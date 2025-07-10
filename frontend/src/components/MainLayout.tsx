@@ -16,29 +16,29 @@ const MainLayout: React.FC = () => {
     switch (selectedSection) {
       case "Dashboard":
         return <Dashboard />
-      case "Usuarios":
+      case "Users":
         return <UserManagement />
-      case "Camiones":
+      case "Trucks":
         return (
           <TruckManagement />
         )
-      case "Rutas":
+      case "Rutes":
         return <TripManagement />
-      case "Alertas":
+      case "Alerts":
         return (
           <div className="p-6">
             <h2 className="text-2xl font-bold">Alertas del Sistema</h2>
             <p>Sección en desarrollo...</p>
           </div>
         )
-      case "Temperaturas":
+      case "Temperatures":
         return (
           <div className="p-6">
             <h2 className="text-2xl font-bold">Control de Temperaturas</h2>
             <p>Sección en desarrollo...</p>
           </div>
         )
-      case "Reportes":
+      case "Reports":
         return (
           <div className="p-6">
             <h2 className="text-2xl font-bold">Reportes</h2>

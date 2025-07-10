@@ -1,12 +1,12 @@
 "use client"
 
+import type { AxiosError } from "axios"
 import type React from "react"
 import { useState } from "react"
 import { useForm } from "../hooks/useForm"
-import { validateRegisterForm, sanitizePhoneInput, formatPhoneNumber } from "../utils/validation"
-import type { RegisterFormData, ApiError } from "../types"
-import type { AxiosError } from "axios"
 import { authAPI } from "../services/api"
+import type { ApiError, RegisterFormData } from "../types"
+import { formatPhoneNumber, sanitizePhoneInput, validateRegisterForm } from "../utils/validation"
 
 const initialValues: RegisterFormData = {
   name: "",
@@ -35,13 +35,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       try {
         setSuccessMessage("")
 
-        // Format phone number before sending
         const formattedData = {
           ...data,
           phoneNumber: formatPhoneNumber(data.phoneNumber),
         }
 
-        // Crear FormData para el registro
         const formData = new FormData()
         formData.append("name", formattedData.name.trim())
         formData.append("lastName", formattedData.lastName.trim())
@@ -81,20 +79,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     (field: keyof RegisterFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       let value = e.target.value
 
-      // Apply specific formatting/sanitization based on field
       if (field === "name" || field === "lastName" || field === "secondLastName") {
-        // Remove special characters except letters, spaces, hyphens, and apostrophes
         value = value.replace(/[^a-zA-ZÀ-ÿ\u00f1\u00d1\s\-']/g, "")
       } else if (field === "phoneNumber") {
-        // Sanitize phone input
         value = sanitizePhoneInput(value)
       } else if (field === "email") {
-        // Convert email to lowercase and trim
         value = value.toLowerCase().trim()
       }
 
       updateField(field, value)
-      setSuccessMessage("") // Clear success message when user starts typing
+      setSuccessMessage("")
     }
 
   const handleFileChange = (field: "license" | "profilePicture") => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +99,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Success Message */}
       {successMessage && (
         <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
           <div className="flex">
@@ -129,7 +122,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-              Nombre *
+              Name <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
@@ -140,17 +133,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
               required
               maxLength={50}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Solo letras, espacios, guiones y apostrofes"
+              placeholder="Type the name"
             />
             {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
             <p className="mt-1 text-xs text-gray-500">
-              Solo se permiten letras, espacios, guiones (-) y apostrofes (')
+              Only letters, spaces, hyphens (-) and apostrophes (') are allowed.
             </p>
           </div>
 
           <div>
             <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-              Apellido *
+              Last Name <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
@@ -161,7 +154,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
               required
               maxLength={50}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Solo letras, espacios, guiones y apostrofes"
+              placeholder="Type the last name"
             />
             {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>}
             <p className="mt-1 text-xs text-gray-500">
@@ -171,7 +164,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
           <div>
             <label htmlFor="secondLastName" className="block text-sm font-medium text-gray-700 mb-2">
-              Segundo Apellido
+              Second Last Name
             </label>
             <input
               type="text"
@@ -181,16 +174,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
               onChange={handleInputChange("secondLastName")}
               maxLength={50}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Solo letras, espacios, guiones y apostrofes"
+              placeholder="Type the second last name"
             />
             {errors.secondLastName && <p className="mt-1 text-sm text-red-600">{errors.secondLastName}</p>}
-            <p className="mt-1 text-xs text-gray-500">Opcional</p>
+            <p className="mt-1 text-xs text-gray-500">Only letters, spaces, hyphens and apostrophes</p>
           </div>
         </div>
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            Correo Electrónico *
+            Email <span className="text-red-600">*</span>
           </label>
           <input
             type="email"
@@ -209,7 +202,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Contraseña *
+              Password <span className="text-red-600">*</span>
             </label>
             <input
               type="password"
@@ -219,14 +212,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
               onChange={handleInputChange("password")}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Mínimo 6 caracteres"
+              placeholder="Minimum 6 characters"
             />
             {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
           </div>
 
           <div>
             <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-              Teléfono *
+              Phone Number <span className="text-red-600">*</span>
             </label>
             <input
               type="tel"
@@ -236,16 +229,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
               onChange={handleInputChange("phoneNumber")}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="+1234567890 o 1234567890"
+              placeholder="+1234567890 or 1234567890"
             />
             {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>}
-            <p className="mt-1 text-xs text-gray-500">Solo números, espacios, guiones, paréntesis y signo +</p>
+            <p className="mt-1 text-xs text-gray-500">Only numbers, spaces, hyphens, parentheses and + sign</p>
           </div>
         </div>
 
         <div>
           <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-            Rol *
+            Rol <span className="text-red-600">*</span>
           </label>
           <select
             id="role"
@@ -255,15 +248,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="driver">Conductor</option>
-            <option value="admin">Administrador</option>
+            <option value="driver">Driver</option>
+            <option value="admin">Administrator</option>
           </select>
           {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role}</p>}
         </div>
 
         <div>
           <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-            Estatus
+            Status
           </label>
           <select
             id="status"
@@ -272,17 +265,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             onChange={handleInputChange("status")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="Available">Disponible</option>
-            <option value="On Trip">En Viaje</option>
-            <option value="Unavailable">No Disponible</option>
-            <option value="Disabled">Deshabilitado</option>
+            <option value="Available">Available</option>
+            <option value="On Trip">On Trip</option>
+            <option value="Unavailable">Unavailable</option>
+            <option value="Disabled">Disabled</option>
           </select>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="license" className="block text-sm font-medium text-gray-700 mb-2">
-              Licencia de Conducir *
+              Driver license <span className="text-red-600">*</span>
             </label>
             <input
               type="file"
@@ -298,7 +291,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
 
           <div>
             <label htmlFor="profilePicture" className="block text-sm font-medium text-gray-700 mb-2">
-              Foto de Perfil *
+              Profile Picture <span className="text-red-600">*</span>
             </label>
             <input
               type="file"

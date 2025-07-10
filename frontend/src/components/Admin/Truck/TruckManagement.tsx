@@ -102,14 +102,17 @@ const TruckManagement: React.FC = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
+                <div className="bg-blue-600 p-2 rounded-xl">
+                  <TruckIcon className="h-6 w-6 text-white"/>
+                </div>
                 <h1 className="text-4xl font-bold text-slate-900">Truck Management</h1>
               </div>
               <div className="flex items-center gap-2 text-slate-600">
-                <span className="text-sm">Total trucks in system:</span>
+                <span className="text-sm">Total trucks:</span>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                  {filteredTrucks.length}
+                  {trucks.length}
                 </span>
-                {searchTerm && <span className="text-sm text-slate-500">(filtered from {trucks.length} total)</span>}
+                {/* {searchTerm && <span className="text-sm text-slate-500">(filtered from {filteredTrucks.length} total)</span>} */}
               </div>
             </div>
 
@@ -271,7 +274,7 @@ const TruckManagement: React.FC = () => {
                           {truck.loadCapacity} kg
                         </span>
                       </td>
-                                            <td className="px-8 py-6 whitespace-nowrap">
+                      <td className="px-8 py-6 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                             statusStyles[truck.status] || statusStyles.Inactive   // fallback por si llega un estado no mapeado

@@ -31,8 +31,8 @@ const Dashboard: React.FC = () => {
 
   const getRoleLabel = (role: User["role"]): string => {
     const roleLabels = {
-      admin: "Administrador",
-      driver: "Conductor",
+      admin: "Administrator",
+      driver: "Driver",
     }
     return roleLabels[role]
   }
@@ -46,8 +46,8 @@ const Dashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Panel de Control</h1>
-          <p className="mt-2 text-gray-600">Bienvenido de vuelta, {user.name}</p>
+          <h1 className="text-3xl font-bold text-gray-900">Control Panel</h1>
+          <p className="mt-2 text-gray-600">Welcome back, {user.name}</p>
         </div>
 
         {/* User Profile Card */}
@@ -101,7 +101,7 @@ const Dashboard: React.FC = () => {
                   <PhoneIcon className="h-5 w-5 text-gray-400" />
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-500">Teléfono</p>
+                  <p className="text-sm font-medium text-gray-500">Phone Number</p>
                   <p className="text-sm text-gray-900">{user.phoneNumber}</p>
                 </div>
               </div>
@@ -111,7 +111,7 @@ const Dashboard: React.FC = () => {
                   <UserIcon className="h-5 w-5 text-gray-400" />
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-500">ID de Usuario</p>
+                  <p className="text-sm font-medium text-gray-500">User ID</p>
                   <p className="text-sm text-gray-900">{user.id}</p>
                 </div>
               </div>
@@ -121,7 +121,7 @@ const Dashboard: React.FC = () => {
                   <CalendarIcon className="h-5 w-5 text-gray-400" />
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-500">Fecha de Registro</p>
+                  <p className="text-sm font-medium text-gray-500">Registration Date</p>
                   <p className="text-sm text-gray-900">{formatDate(user.registrationDate)}</p>
                 </div>
               </div>
@@ -134,7 +134,7 @@ const Dashboard: React.FC = () => {
           {/* License Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Licencia de Conducir</h3>
+              <h3 className="text-lg font-medium text-gray-900">Driver license</h3>
             </div>
             <div className="p-6">
               {user.license ? (
@@ -152,7 +152,7 @@ const Dashboard: React.FC = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors"
                     >
-                      Ver en tamaño completo
+                      View full size
                     </a>
                   </div>
                 </div>
@@ -171,7 +171,7 @@ const Dashboard: React.FC = () => {
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     />
                   </svg>
-                  <p className="mt-2 text-sm text-gray-500">No hay licencia disponible</p>
+                  <p className="mt-2 text-sm text-gray-500">No license available</p>
                 </div>
               )}
             </div>
@@ -180,7 +180,7 @@ const Dashboard: React.FC = () => {
           {/* Profile Picture Card */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Foto de Perfil</h3>
+              <h3 className="text-lg font-medium text-gray-900">Profile Picture</h3>
             </div>
             <div className="p-6">
               {user.profilePicture ? (
@@ -197,7 +197,7 @@ const Dashboard: React.FC = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors"
                     >
-                      Ver en tamaño completo
+                      View full size
                     </a>
                   </div>
                 </div>
@@ -216,37 +216,13 @@ const Dashboard: React.FC = () => {
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
-                  <p className="mt-2 text-sm text-gray-500">No hay foto de perfil disponible</p>
+                  <p className="mt-2 text-sm text-gray-500">No profile picture available</p>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        {user.role === "admin" && (
-          <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Acciones Rápidas</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-                <div className="text-sm font-medium text-gray-900">Gestionar Usuarios</div>
-                <div className="text-sm text-gray-500">Ver y administrar usuarios</div>
-              </button>
-              <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-                <div className="text-sm font-medium text-gray-900">Ver Reportes</div>
-                <div className="text-sm text-gray-500">Generar reportes del sistema</div>
-              </button>
-              <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-                <div className="text-sm font-medium text-gray-900">Configuración</div>
-                <div className="text-sm text-gray-500">Ajustes del sistema</div>
-              </button>
-              <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-                <div className="text-sm font-medium text-gray-900">Alertas</div>
-                <div className="text-sm text-gray-500">Ver alertas del sistema</div>
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

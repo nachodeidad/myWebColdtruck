@@ -1,13 +1,13 @@
 "use client"
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useForm } from "../hooks/useForm"
-import type { User, ApiError } from "../types"
 import type { AxiosError } from "axios"
-import { XIcon, UserIcon, MailIcon, PhoneIcon, BadgeIcon, CameraIcon, FileTextIcon } from "lucide-react"
+import { BadgeIcon, CameraIcon, FileTextIcon, MailIcon, PhoneIcon, UserIcon, XIcon } from "lucide-react"
+import type React from "react"
+import { useEffect, useState } from "react"
+import { useForm } from "../hooks/useForm"
 import { authAPI } from "../services/api"
-import { validateEditUserForm, sanitizePhoneInput, formatPhoneNumber } from "../utils/validation"
+import type { ApiError, User } from "../types"
+import { formatPhoneNumber, sanitizePhoneInput, validateEditUserForm } from "../utils/validation"
 
 interface EditUserData {
   name: string
@@ -176,7 +176,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
     }
   }
 
-  // Reset form and previews when user changes
   useEffect(() => {
     if (user) {
       updateField("name", user.name)
@@ -220,7 +219,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                   />
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Editar Usuario</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Edit User</h3>
                   <p className="text-sm text-gray-500">ID: {user.id}</p>
                 </div>
               </div>
@@ -256,12 +255,12 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Basic Information */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="text-md font-medium text-gray-900 mb-4">Información Personal</h4>
+                <h4 className="text-md font-medium text-gray-900 mb-4">Personal Information</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                       <UserIcon className="h-4 w-4 inline mr-1" />
-                      Nombre *
+                      Name
                     </label>
                     <input
                       type="text"
@@ -280,7 +279,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                   <div>
                     <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
                       <UserIcon className="h-4 w-4 inline mr-1" />
-                      Apellido *
+                      Last Name
                     </label>
                     <input
                       type="text"
@@ -299,7 +298,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                 <div>
                   <label htmlFor="secondLastName" className="block text-sm font-medium text-gray-700 mb-1">
                     <UserIcon className="h-4 w-4 inline mr-1" />
-                    Segundo Apellido
+                    Second Last Name
                   </label>
                   <input
                     type="text"
@@ -319,7 +318,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                       <MailIcon className="h-4 w-4 inline mr-1" />
-                      Correo Electrónico *
+                      Email
                     </label>
                     <input
                       type="email"
@@ -337,7 +336,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                   <div>
                     <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
                       <PhoneIcon className="h-4 w-4 inline mr-1" />
-                      Teléfono *
+                      Phone Number
                     </label>
                     <input
                       type="tel"
@@ -356,7 +355,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                 <div className="mt-4">
                   <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
                     <BadgeIcon className="h-4 w-4 inline mr-1" />
-                    Rol *
+                    Role 
                   </label>
                   <select
                     id="role"
@@ -366,15 +365,15 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="driver">Conductor</option>
-                    <option value="admin">Administrador</option>
+                    <option value="driver">Driver</option>
+                    <option value="admin">Administrator</option>
                   </select>
                   {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role}</p>}
                 </div>
 
                 <div className="mt-4">
                   <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                    Estatus
+                    Status
                   </label>
                   <select
                     id="status"
@@ -383,10 +382,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                     onChange={handleInputChange("status")}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="Available">Disponible</option>
-                    <option value="On Trip">En Viaje</option>
-                    <option value="Unavailable">No Disponible</option>
-                    <option value="Disabled">Deshabilitado</option>
+                    <option value="Available">Available</option>
+                    <option value="On Trip">On Trip</option>
+                    <option value="Unavailable">Unavailable</option>
+                    <option value="Disabled">Disabled</option>
                   </select>
                 </div>
               </div>
@@ -399,7 +398,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                   <div>
                     <label htmlFor="profilePicture" className="block text-sm font-medium text-gray-700 mb-2">
                       <CameraIcon className="h-4 w-4 inline mr-1" />
-                      Foto de Perfil
+                      Profile Picture
                     </label>
 
                     {/* Current/Preview Image */}
@@ -423,14 +422,14 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                       onChange={handleFileChange("profilePicture")}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
-                    <p className="mt-1 text-xs text-gray-500">Formatos: JPG, PNG, GIF. Máximo 5MB.</p>
+                    <p className="mt-1 text-xs text-gray-500">Formats: JPG, PNG, GIF. Maximum 5MB.</p>
                   </div>
 
                   {/* License */}
                   <div>
                     <label htmlFor="license" className="block text-sm font-medium text-gray-700 mb-2">
                       <FileTextIcon className="h-4 w-4 inline mr-1" />
-                      Licencia de Conducir
+                      Driver license
                     </label>
 
                     {/* Current/Preview Image */}
@@ -454,7 +453,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                       onChange={handleFileChange("license")}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
-                    <p className="mt-1 text-xs text-gray-500">Formatos: JPG, PNG, PDF. Máximo 5MB.</p>
+                    <p className="mt-1 text-xs text-gray-500">Formats: JPG, PNG, GIF. Maximum 5MB.</p>
                   </div>
                 </div>
               </div>
@@ -473,8 +472,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-blue-700">
-                      <strong>Nota:</strong> Si no seleccionas nuevas imágenes, se mantendrán las actuales. Los cambios
-                      se aplicarán inmediatamente al guardar.
+                      <strong>Note:</strong> If you don't select new images, the current ones will be kept. Changes will be applied immediately upon saving.
                     </p>
                   </div>
                 </div>
@@ -496,7 +494,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
                   Actualizando...
                 </div>
               ) : (
-                "Guardar Cambios"
+                "Save Changes"
               )}
             </button>
             <button
@@ -505,7 +503,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, isOpen, onClose, on
               disabled={isSubmitting || isUpdating}
               className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Cancelar
+              Cancel
             </button>
           </div>
         </div>
