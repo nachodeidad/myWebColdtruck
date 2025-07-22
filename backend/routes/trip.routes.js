@@ -41,7 +41,7 @@ router.get('/specific', async (_req, res) => {
     try {
         const trips = await Trip
         .find()
-        .populate('IDDriver IDAdmin IDBox IDRute IDTruck');
+        .populate('IDDriver IDAdmin IDBox IDRute IDTruck IDCargoType');
         return res.json(trips);
     } catch (err) {
         console.error('Error getting trips:', err);

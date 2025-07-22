@@ -24,6 +24,19 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/Available', async (req, res) => {
+    try {
+        const trucks = await Truck.find({ status: 'Available' })
+            .populate('IDBrand', 'name')
+            .populate('IDModel', 'name');
+        res.json(trucks);
+    } catch (error) {
+        console.error("GET /trucks error:", error);
+        res.status(500).json({ error: 'Error getting trucks' });
+    }
+});
+
+
 router.put('/:id', async (req, res) => {
     try {
         const id = Number(req.params.id);

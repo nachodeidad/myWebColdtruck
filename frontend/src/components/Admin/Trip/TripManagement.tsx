@@ -2,16 +2,20 @@
 
 import type React from "react"
 
+import { AlertCircle, Calendar, Loader2, MapPin, Plus, Route, Truck, User } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useAuth } from "../../../contexts/AuthContext"
-import { getRutes, getRuteGeometry } from "../../../services/ruteService"
-import { Plus, Route, Truck, User, Calendar, MapPin, Loader2, AlertCircle } from "lucide-react"
-import CreateRuteForm from "../Rute/CreateRuteForm"
-import { getTrips, createTrip, type TripInput } from "../../../services/tripService"
-import { getTrucks } from "../../../services/truckService"
 import { authAPI } from "../../../services/api"
-import type { Rute, Trip, User as UserType, Truck as TruckType } from "../../../types"
+import { getBoxsAvailable } from "../../../services/boxService"
+import { getCargoTypes } from "../../../services/cargoTypeService"
+import { getRuteGeometry, getRutes } from "../../../services/ruteService"
+import { createTrip, getTrips, type TripInput } from "../../../services/tripService"
+import { getTrucksAvailable } from "../../../services/truckService"
+import type { Rute, Trip, Truck as TruckType, User as UserType } from "../../../types"
+import { Box } from "../../../types/Box"
+import { CargoType } from "../../../types/CargoType"
 import MapView from "../../Map/MapView"
+import CreateRuteForm from "../Rute/CreateRuteForm"
 
 const TripManagement: React.FC = () => {
   const { user } = useAuth()
@@ -19,6 +23,8 @@ const TripManagement: React.FC = () => {
   const [drivers, setDrivers] = useState<UserType[]>([])
   const [trucks, setTrucks] = useState<TruckType[]>([])
   const [trips, setTrips] = useState<Trip[]>([])
+  const [cargoTypes, setCargoTypes] = useState<CargoType[]>([])
+  const [boxs, setBoxs] = useState<Box[]>([])
   const [selectedRute, setSelectedRute] = useState<Rute | null>(null)
   const [path, setPath] = useState<[number, number][]>([])
   const [loading, setLoading] = useState(false)
@@ -32,6 +38,8 @@ const TripManagement: React.FC = () => {
     IDDriver: "",
     IDRute: "",
     IDTruck: "",
+    IDCargoType: "",
+    IDBox: "",
   })
 
   useEffect(() => {
@@ -41,16 +49,20 @@ const TripManagement: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true)
-      const [ruteData, userData, truckData, tripData] = await Promise.all([
+      const [ruteData, userData, truckData, tripData, cargoTypeData, boxData] = await Promise.all([
         getRutes(),
         authAPI.getAllUsers(),
-        getTrucks(),
+        getTrucksAvailable(),
         getTrips(),
+        getCargoTypes(),
+        getBoxsAvailable(),
       ])
       setRutes(ruteData)
       setDrivers(userData.filter((u) => u.role === "driver"))
       setTrucks(truckData)
       setTrips(tripData)
+      setCargoTypes(cargoTypeData)
+      setBoxs(boxData)
     } catch (err) {
       console.error(err)
       setError("Error loading data")
@@ -87,7 +99,7 @@ const TripManagement: React.FC = () => {
   const handleSubmit = async () => {
     if (!user) return
 
-    if (!form.IDDriver || !form.IDRute || !form.IDTruck || !form.scheduledDepartureDate || !form.scheduledArrivalDate) {
+    if (!form.IDDriver || !form.IDRute || !form.IDTruck || !form.IDCargoType || !form.IDBox || !form.scheduledDepartureDate || !form.scheduledArrivalDate) {
       setError("Please complete all fields")
       return
     }
@@ -97,10 +109,10 @@ const TripManagement: React.FC = () => {
       scheduledArrivalDate: new Date(form.scheduledArrivalDate).toISOString(),
       IDDriver: Number(form.IDDriver),
       IDAdmin: Number(user.id),
-      IDBox: 1,
       IDRute: Number(form.IDRute),
       IDTruck: Number(form.IDTruck),
-      IDCargoType: 1,
+      IDCargoType: Number(form.IDCargoType),
+      IDBox: Number(form.IDBox),
     }
 
     try {
@@ -112,6 +124,8 @@ const TripManagement: React.FC = () => {
         IDDriver: "",
         IDRute: "",
         IDTruck: "",
+        IDCargoType: "",
+        IDBox: "",
       })
       setSuccess("Trip assigned successfully!")
       setTimeout(() => setSuccess(""), 3000)
@@ -236,7 +250,7 @@ const TripManagement: React.FC = () => {
           </div>
 
           <div className="p-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Driver Selection */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
@@ -298,6 +312,53 @@ const TripManagement: React.FC = () => {
                   {trucks.map((t) => (
                     <option key={t._id} value={t._id}>
                       {t.plates}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Box Selection */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <Truck className="h-4 w-4 text-slate-500" />
+                  Box <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="IDBox"
+                  value={form.IDBox}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 appearance-none"
+                  disabled={submitting}
+                >
+                <option value="">Select Box</option>
+                  {boxs.map((b) => {
+                    const volume = (b.length * b.width * b.height).toFixed(0); // m³ redondeado
+                    return (
+                      <option key={b._id} value={b._id}>
+                        #{b._id} − {volume} m³ − {b.maxWeigth} Kg
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {/* Cargo Type Selection */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <Truck className="h-4 w-4 text-slate-500" />
+                  Cargo Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="IDCargoType"
+                  value={form.IDCargoType}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 appearance-none"
+                  disabled={submitting}
+                >
+                  <option value="">Select Cargo Type</option>
+                  {cargoTypes.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}
                     </option>
                   ))}
                 </select>

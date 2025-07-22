@@ -1,3 +1,4 @@
+import { CargoType } from './CargoType'
 import { Rute } from './Rute'
 import { Truck } from './Truck'
 import { User } from './index'
@@ -22,6 +23,6 @@ export interface Trip {
     IDBox: number
     IDRute: number | Rute
     IDTruck: number | Truck
-    IDCargoType: number
+    IDCargoType: number | CargoType
     alerts?: AlertInfo[]
 }

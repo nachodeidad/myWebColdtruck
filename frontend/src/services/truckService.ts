@@ -30,3 +30,8 @@ export const updateTruck = async (
     const { data } = await apiLocalHost.put<Truck>(`/trucks/${id}`, payload);
     return data;
 };
+
+export const getTrucksAvailable = async (): Promise<Truck[]> => {
+    const { data } = await apiLocalHost.get<Truck[]>("/trucks/Available");
+    return data;
+};

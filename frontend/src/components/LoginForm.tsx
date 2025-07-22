@@ -1,9 +1,9 @@
 "use client";
 
 import type { AxiosError } from "axios";
-import { TruckIcon } from "lucide-react";
+import { ArrowLeft, TruckIcon } from "lucide-react";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useForm } from "../hooks/useForm";
 import type { ApiError, LoginCredentials } from "../types";
@@ -63,6 +63,11 @@ const LoginForm: React.FC = () => {
         }}
       />
         <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 z-10">
+          <Link to="/landing">
+            <button>
+              <ArrowLeft className="bg-blue-500 rounded-md text-white hover:bg-blue-700 duration-900"/>
+            </button>
+          </Link>
           <div className="text-center mb-8">
             <div className=" flex justify-center items-center ">
               <div className="bg-blue-500 rounded-md m-1.5 p-3 h-9 flex justify-center items-center ">

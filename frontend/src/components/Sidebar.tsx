@@ -3,15 +3,15 @@
 import { motion } from "framer-motion"
 import {
   BadgeAlertIcon as AlertsIcon,
+  Box,
   ChevronLeftIcon,
   ChevronRightIcon,
   HomeIcon,
   LogOutIcon as LogoutIcon,
-  FlagIcon as ReportsIcon,
   RouteIcon as RoutesIcon,
   ThermometerIcon as TemperaturesIcon,
   TruckIcon,
-  UsersIcon,
+  UsersIcon
 } from "lucide-react"
 import React, { useState } from "react"
 import { useAuth } from "../contexts/AuthContext"
@@ -82,7 +82,12 @@ const adminOptions = [
   },
   {
     icon: <RoutesIcon size={20} />,
-    title: "Rutes",
+    title: "Trips",
+    hidden: false,
+  },
+  {
+    icon: <Box size={20} />,
+    title: "Boxs",
     hidden: false,
   },
   {
@@ -95,11 +100,11 @@ const adminOptions = [
     title: "Temperatures",
     hidden: false,
   },
-  {
-    icon: <ReportsIcon size={20} />,
-    title: "Reports",
-    hidden: false,
-  },
+  // {
+  //   icon: <ReportsIcon size={20} />,
+  //   title: "Reports",
+  //   hidden: false,
+  // },
 ]
 
 const driverOptions = [
@@ -202,9 +207,9 @@ const TitleSection: React.FC<TitleSectionProps> = ({ open, user }) => {
 
 // titulo
   return (
-    <motion.div
+    <motion.button
       layout
-      className="flex items-center gap-3 rounded-md bg-white p-2 text-blue-900"
+      className="flex items-center gap-3 rounded-md bg-white hover:bg-gray-100 p-2 text-blue-900 w-full"
     >
       <div className="h-10 w-10 overflow-hidden rounded-full bg-blue-600">
         {user.profilePicture ? (
@@ -221,7 +226,7 @@ const TitleSection: React.FC<TitleSectionProps> = ({ open, user }) => {
           <span className="block text-xs text-blue-900">{getRoleLabel(user.role)}</span>
         </div>
       )}
-    </motion.div>
+    </motion.button>
   )
 }
   // pa ocultar

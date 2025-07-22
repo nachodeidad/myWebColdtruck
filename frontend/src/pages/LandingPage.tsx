@@ -24,19 +24,18 @@ return (
                 <a href="#AboutUs" className="px-2 py-1 pb-1 border-b-2 border-transparent hover:border-blue-500 duration-500">About Us</a>
                 <a href="#ContactUs" className="px-2 py-1 pb-1 border-b-2 border-transparent hover:border-blue-500 duration-500">Contact Us</a>
                 <Link to="/login">
-                    <button type="button" className='text-white rounded-md py-1 px-3 bg-blue-500 hover:bg-blue-400 p-0.5'>
+                    <button type="button" className='text-white rounded-md py-1 px-3 bg-blue-500 hover:bg-blue-700 p-0.5 duration-900'>
                         Sign In
                     </button>
                 </Link>
             </div>
             <div className='lg:hidden justify-center items-center py-5 gap-6 z-10'>
                 <Link to="/login">
-                    <button type="button" className='text-white rounded-md py-1 px-3 bg-blue-500 hover:bg-blue-400 p-0.5'>
+                    <button type="button" className='text-white rounded-md py-1 px-3 bg-blue-500 hover:bg-blue-400 p-0.5 duration-900'>
                         Sign In
                     </button>
                 </Link>
             </div>
-            
         </header>
         <main>
             <section className="flex-col justify-center items-center p-24 lg:flex lg:flex-row lg:justify-between w-full bg-[#0f172a] relative">
@@ -149,7 +148,7 @@ return (
                     backgroundImage: `radial-gradient(circle 600px at 50% 50%, rgba(59,130,246,0.3), transparent)`,
                     }}
                 />
-                <div className="lg:w-screen aspect-square mb-10">
+                <div className="lg:w-full aspect-auto mb-10 spline-container pl-[-24]">
                     <Spline scene="https://prod.spline.design/7c3lgQ56H3Cc8Dqb/scene.splinecode" />
                 </div>
                 <div className="lg:ml-10 grid gap-10 z-10">
@@ -185,12 +184,12 @@ return (
                         <div className='flex justify-center items-center'>
                             <p className='text-gray-500'>Full Stack Developer</p>
                         </div>
-                        <div className='flex justify-center items-center  bg-blue-200 p-2 rounded-lg'>
+                        <div className='flex justify-center items-center  bg-blue-200 p-2 rounded-lg mt-2'>
                             <p className='text-center'>Especialista en React, Node.js y arquitecturas de microservicios. Líder técnico del proyecto.</p>
                         </div>
                         <div className='flex justify-center items-center mt-4'>
-                            <Github />
-                            <Mail />
+                            <Github className='mr-3'/>
+                            <Mail className='ml-3'/>
                         </div>
                     </div>
                     <div className='shadow-xl rounded-lg p-8'>
@@ -203,12 +202,12 @@ return (
                         <div className='flex justify-center items-center'>
                             <p className='text-gray-500'>IoT Specialist</p>
                         </div>
-                        <div className='flex justify-center items-center  bg-green-200 p-2 rounded-lg'>
+                        <div className='flex justify-center items-center  bg-green-200 p-2 rounded-lg mt-2'>
                             <p className='text-center'>Expert in IoT sensors, device communication, and telemetry protocols for refrigerated trailers.</p>
                         </div>
                         <div className='flex justify-center items-center mt-4'>
-                            <Github />
-                            <Mail />
+                            <Github className='mr-3'/>
+                            <Mail className='ml-3'/>
                         </div>
                     </div>
                     <div className='shadow-xl rounded-lg p-8'>
@@ -221,12 +220,12 @@ return (
                         <div className='flex justify-center items-center'>
                             <p className='text-gray-500 text-center'>Scrum Master and Backend Developer</p>
                         </div>
-                        <div className='flex justify-center items-center bg-violet-200 p-2 rounded-lg'>
+                        <div className='flex justify-center items-center bg-violet-200 p-2 rounded-lg mt-2'>
                             <p className='text-center'>Technical project leader. Specialist in databases, REST APIs, and real-time systems. Backend infrastructure architect.</p>
                         </div>
                         <div className='flex justify-center items-center mt-4'>
-                            <Github />
-                            <Mail />
+                            <Github className='mr-3'/>
+                            <Mail className='ml-3'/>
                         </div>
                     </div>
                     <div className='shadow-xl rounded-lg p-8'>
@@ -239,11 +238,11 @@ return (
                         <div className='flex justify-center items-center'>
                             <p className='text-gray-500'>Frontend Developer</p>
                         </div>
-                        <div className='flex justify-center items-center bg-orange-200 p-2 rounded-lg'>
+                        <div className='flex justify-center items-center bg-orange-200 p-2 rounded-lg mt-2'>
                             <p className='text-center'>Expert in UX/UI and front-end development with React and TypeScript. Responsible for user experience.</p>
                         </div>
                         <div className='flex justify-center items-center mt-4'>
-                            <Github />
+                            <Github className='mr-6'/>
                             <Mail />
                         </div>
                     </div>
@@ -257,11 +256,11 @@ return (
                         <div className='flex justify-center items-center'>
                             <p className='text-gray-500'>Mobile Developer</p>
                         </div>
-                        <div className='flex justify-center items-center bg-red-200 p-2 rounded-lg'>
-                            <p className='text-center'>Mobile app development specialist, using React Native.</p>
+                        <div className='flex justify-center items-center bg-red-200 p-2 rounded-lg mt-2'>
+                            <p className='text-center'>Mobile app development specialist, using React Native with Expo Go.</p>
                         </div>
                         <div className='flex justify-center items-center mt-4'>
-                            <Github />
+                            <Github className='mr-6'/>
                             <Mail />
                         </div>
                     </div>

@@ -13,9 +13,8 @@ const BoxSchema = new mongoose.Schema(
         width: { type: Number, required: true },
         height: { type: Number, required: true },
         maxWeigth: { type: Number, required: true },
-        IDAdmin: { type: Number, required: true }
-    },
-    { _id: false, timestamps: true }
+        IDAdmin: { type: Number, required: true, ref: 'User' }
+    }
 );
 
 BoxSchema.pre('save', autoIncrementId('Box'));

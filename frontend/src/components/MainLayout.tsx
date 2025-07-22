@@ -2,18 +2,22 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Sidebar } from "./Sidebar"
-import Dashboard from "./Dashboard"
-import UserManagement from "./UserManagement"
-import TruckManagement from "./Admin/Truck/TruckManagement"
+import BoxManagement from "./Admin/Box&Cargo/BoxManagement"
 import TripManagement from "./Admin/Trip/TripManagement"
+import TruckManagement from "./Admin/Truck/TruckManagement"
+import Dashboard from "./Dashboard"
 import MyTrips from "./MyTrips"
+import Profile from "./Profile/Profile"
+import { Sidebar } from "./Sidebar"
+import UserManagement from "./UserManagement"
 
 const MainLayout: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState("Dashboard")
 
   const renderContent = () => {
     switch (selectedSection) {
+      case "Profile":
+        return <Profile />
       case "Dashboard":
         return <Dashboard />
       case "Users":
@@ -22,8 +26,10 @@ const MainLayout: React.FC = () => {
         return (
           <TruckManagement />
         )
-      case "Rutes":
+      case "Trips":
         return <TripManagement />
+      case "Boxs":
+        return <BoxManagement />
       case "Alerts":
         return (
           <div className="p-6">

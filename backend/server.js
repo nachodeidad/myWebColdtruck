@@ -13,6 +13,7 @@ const boxModel = require('./models/Box');
 const ruteModel = require('./models/Rute');
 const truckModel = require('./models/Truck');
 const tripModel = require('./models/Trip');
+const cargoTypeModel = require('./models/CargoType');
 
 
 // Middleware
@@ -26,6 +27,8 @@ app.use('/api/models', require('./routes/model.routes'))
 app.use('/api/trucks', require('./routes/truck.routes'))
 app.use('/api/rutes', require('./routes/rute.routes'))
 app.use('/api/trips', require('./routes/trip.routes'))
+app.use('/api/boxs', require('./routes/box.routes'))
+app.use('/api/cargoType', require('./routes/cargoType.routes'))
 
 // MongoDB connection
 mongoose
