@@ -1,14 +1,17 @@
-import { Box, PencilRuler, Weight } from "lucide-react"
+import { Box, Microchip, PencilRuler, Weight } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useAuth } from "../../../contexts/AuthContext"
-import { createBox, getBoxs} from "../../../services/boxService"
+import { createBox, getBoxs } from "../../../services/boxService"
 import { createCargoType, getCargoTypes } from "../../../services/cargoTypeService"
+import { getSensorsActive } from "../../../services/sensorService"
 import { Box as BoxType } from "../../../types/Box"
 import { CargoType } from "../../../types/CargoType"
+import { Sensor } from "../../../types/Sensor"
 
 const BoxManagement = () => {
     const [cargoTypes, setCargoTypes] = useState<CargoType[]>([])
     const [boxes, setBoxes] = useState<BoxType[]>([])
+    const [sensors, setSensors] = useState<Sensor[]>([])
     const [formCargo, setFormCargo] = useState({
         name: "",
         description: "",
@@ -21,6 +24,11 @@ const BoxManagement = () => {
         height: "",
         maxWeigth: "",
         IDAdmin: "",
+    })
+
+    const [formSensor_Box, setSensor_Box] = useState({
+        IDSensor: "",
+        IDBox: "",
     })
     const { user } = useAuth()
 
@@ -53,6 +61,20 @@ const BoxManagement = () => {
 
         fetchCargoTypes();
     }, []);
+
+    useEffect(() => {
+        const fetchSensors = async () => {
+        try {
+            const data = await getSensorsActive();
+            setSensors(data);
+        } catch (error) {
+            console.error("Error fetching cargo types:", error);
+        }
+        };
+
+        fetchSensors();
+    }, []);
+
 
     useEffect(() => {
         const fetchBoxes = async () => {
@@ -159,7 +181,6 @@ const BoxManagement = () => {
                                     }
                                     >
                                     <option value="Available">Available</option>
-                                    <option value="Under Maintenance">Under Maintenance</option>
                                     <option value="Inactive">Inactive</option>
                                 </select>
                             </div>
@@ -231,6 +252,27 @@ const BoxManagement = () => {
                                     }
                                 />
                             </div>
+                            {/* Max Weight Selection */}
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                                    <Microchip className="h-4 w-4 text-slate-500" />
+                                        Sensor
+                                    <span className="text-red-500">*</span>
+                                </label>
+                                <select className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 appearance-none"
+                                    value={formSensor_Box.IDSensor}
+                                    onChange={(e) =>
+                                        setSensor_Box({ ...formSensor_Box, IDSensor: e.target.value })
+                                    }
+                                    >
+                                    <option value="">Select sensor</option>
+                                    {sensors.map((d) => (
+                                        <option key={d._id} value={d._id}>
+                                        {d._id} {d.type}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                         <div className="pt-4">
                             <button
@@ -253,7 +295,7 @@ const BoxManagement = () => {
                                     <h1 className="text-4xl font-bold text-slate-900">Cargo Type Management</h1>
                                 </div>
                                 <div className="flex items-center gap-2 text-slate-600">
-                                    <span className="text-sm">Total Boxs:</span>
+                                    <span className="text-sm">Total Types:</span>
                                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
                                         {cargoTypes.length}
                                     </span>

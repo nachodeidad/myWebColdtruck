@@ -29,6 +29,8 @@ app.use('/api/rutes', require('./routes/rute.routes'))
 app.use('/api/trips', require('./routes/trip.routes'))
 app.use('/api/boxs', require('./routes/box.routes'))
 app.use('/api/cargoType', require('./routes/cargoType.routes'))
+app.use('/api/sensors', require('./routes/sensor.routes'))
+app.use('/api/sensor_box', require('./routes/sensor_box.routes'))
 
 // MongoDB connection
 mongoose

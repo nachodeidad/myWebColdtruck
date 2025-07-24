@@ -16,12 +16,13 @@ const router = express.Router();
     router.post('/', async (req, res) => {
         try {
             const cargo = new CargoType({
-            name: req.body.name,
-            description: req.body.description,
+                name: req.body.name,
+                description: req.body.description,
             });
             await cargo.save();
             res.status(201).json(cargo);
         } catch (error) {
+            console.error(error);
             res.status(400).json({ error: 'Error saving Cargo Type' });
         }
     });
