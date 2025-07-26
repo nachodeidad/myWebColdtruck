@@ -8,12 +8,12 @@ import { authAPI } from "../services/api"
 import type { User } from "../types"
 import { formatPhoneNumber } from "../utils/validation"
 import EditUserModal from "./EditUserModal"
-import RegisterForm from "./RegisterForm"
+import RegisterUserModal from "./RegisterUserModal"
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [showRegisterForm, setShowRegisterForm] = useState(false)
+  const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
@@ -42,7 +42,7 @@ const UserManagement: React.FC = () => {
   }
 
   const handleUserRegistered = () => {
-    setShowRegisterForm(false)
+    setShowRegisterModal(false)
     loadUsers()
   }
 
@@ -186,11 +186,11 @@ const UserManagement: React.FC = () => {
 
               <div className="flex-shrink-0">
                 <button
-                  onClick={() => setShowRegisterForm(!showRegisterForm)}
+                  onClick={() => setShowRegisterModal(!showRegisterModal)}
                   className="group inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
                 >
                   <UserPlusIcon className="h-5 w-5 " />
-                  {showRegisterForm ? "Cancel" : "Register User"}
+                  {showRegisterModal ? "Cancel" : "Register User"}
                 </button>
               </div>
             </div>
@@ -216,12 +216,13 @@ const UserManagement: React.FC = () => {
             </div>
           )}
 
-          {/* Register Form */}
-          {showRegisterForm && (
-            <div className="mb-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Register New User</h2>
-              <RegisterForm onSuccess={handleUserRegistered} />
-            </div>
+          {/* Register Modal */}
+          {showRegisterModal && (
+            <RegisterUserModal
+              isOpen={showRegisterModal}
+              onClose={() => setShowRegisterModal(false)}
+              onSuccess={handleUserRegistered}
+            />
           )}
 
           {/* Search Bar */}

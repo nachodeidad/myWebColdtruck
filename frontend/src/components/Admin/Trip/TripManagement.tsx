@@ -15,7 +15,7 @@ import type { Rute, Trip, Truck as TruckType, User as UserType } from "../../../
 import { Box } from "../../../types/Box"
 import { CargoType } from "../../../types/CargoType"
 import MapView from "../../Map/MapView"
-import CreateRuteForm from "../Rute/CreateRuteForm"
+import CreateRuteModal from "../Rute/CreateRuteModal"
 
 const TripManagement: React.FC = () => {
   const { user } = useAuth()
@@ -31,7 +31,7 @@ const TripManagement: React.FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const [showRuteForm, setShowRuteForm] = useState(false)
+  const [showRuteModal, setShowRuteModal] = useState(false)
   const [form, setForm] = useState({
     scheduledDepartureDate: "",
     scheduledArrivalDate: "",
@@ -200,13 +200,13 @@ const TripManagement: React.FC = () => {
 
             <div className="flex-shrink-0">
               <button
-                onClick={() => setShowRuteForm(!showRuteForm)}
+                onClick={() => setShowRuteModal(!showRuteModal)}
                 className="group inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
               >
                 <Plus
-                  className={`h-5 w-5 transition-transform duration-200 ${showRuteForm ? "rotate-45" : "group-hover:scale-110"}`}
+                  className={`h-5 w-5 transition-transform duration-200 ${showRuteModal ? "rotate-45" : "group-hover:scale-110"}`}
                 />
-                {showRuteForm ? "Cancel Route Creation" : "Create New Route"}
+                {showRuteModal ? "Cancel Route Creation" : "Create New Route"}
               </button>
             </div>
           </div>
@@ -235,11 +235,13 @@ const TripManagement: React.FC = () => {
           </div>
         )}
 
-        {/* Route Creation Form */}
-        {showRuteForm && (
-          <div className="mb-8">
-            <CreateRuteForm onCreated={handleRuteCreated} />
-          </div>
+        {/* Route Creation Modal */}
+        {showRuteModal && (
+          <CreateRuteModal
+            isOpen={showRuteModal}
+            onClose={() => setShowRuteModal(false)}
+            onCreated={handleRuteCreated}
+          />
         )}
 
         {/* Trip Assignment Form */}
