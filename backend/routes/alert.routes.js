@@ -17,7 +17,10 @@ router.get('/', async (_req, res) => {
 // Alerts grouped by truck using trip information
 router.get('/byTruck', async (_req, res) => {
   try {
-    const trips = await Trip.find({ 'alerts.0': { $exists: true } }).populate('IDTruck');
+    const trips = await Trip.find({ 'alerts.0': { $exists: true } }).populate({
+      path: 'IDTruck',
+      populate: ['IDBrand', 'IDModel'],
+    });
     const result = trips.map((t) => ({
       truck: t.IDTruck,
       alerts: t.alerts,

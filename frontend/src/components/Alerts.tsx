@@ -35,24 +35,34 @@ const Alerts: React.FC = () => {
           <p>No alerts</p>
         ) : (
           <div className="space-y-8">
-            {data.map((item) => (
-              <div key={(item.truck as any)._id} className="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div className="px-6 py-4 flex items-center gap-3 border-b border-gray-200">
-                  <Truck className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold text-lg">Truck {(item.truck as any).plates || (item.truck as any)._id}</h3>
+            {data.map((item) => {
+              const truck = item.truck as any;
+              const brand = truck.IDBrand?.name || truck.IDBrand;
+              const model = truck.IDModel?.name || truck.IDModel;
+              return (
+                <div key={truck._id} className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <Truck className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-semibold text-lg">Truck {truck.plates || truck._id}</h3>
+                    </div>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Brand: {brand} | Model: {model} | Status: {truck.status}
+                    </p>
+                  </div>
+                  <ul className="divide-y divide-gray-100">
+                    {item.alerts.map((a) => (
+                      <li key={a.IDAlert} className="px-6 py-4 flex items-center gap-3">
+                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                        <span className="text-sm text-gray-800">
+                          {new Date(a.dateTime).toLocaleString()} - {a.temperature}°C / {a.humidity}%
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="divide-y divide-gray-100">
-                  {item.alerts.map((a) => (
-                    <li key={a.IDAlert} className="px-6 py-4 flex items-center gap-3">
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                      <span className="text-sm text-gray-800">
-                        {new Date(a.dateTime).toLocaleString()} - {a.temperature}°C / {a.humidity}%
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

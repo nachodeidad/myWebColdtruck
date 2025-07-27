@@ -72,7 +72,7 @@ const TripManagement: React.FC = () => {
   }
 
   const handleRuteCreated = () => {
-    setShowRuteForm(false)
+    setShowRuteModal(false)
     setSuccess("Route created successfully!")
     setTimeout(() => setSuccess(""), 3000)
     loadData()
