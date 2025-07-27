@@ -52,11 +52,17 @@ const Alerts: React.FC = () => {
                   </div>
                   <ul className="divide-y divide-gray-100">
                     {item.alerts.map((a) => (
-                      <li key={a.IDAlert} className="px-6 py-4 flex items-center gap-3">
-                        <AlertTriangle className="h-5 w-5 text-red-600" />
-                        <span className="text-sm text-gray-800">
-                          {new Date(a.dateTime).toLocaleString()} - {a.temperature}°C / {a.humidity}%
-                        </span>
+                      <li key={a.IDAlert} className="px-6 py-4 flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-red-600 mt-1" />
+                        <div className="text-sm text-gray-800">
+                          <div className="font-medium">
+                            {a.type} - {new Date(a.dateTime).toLocaleString()}
+                          </div>
+                          <div className="text-gray-600">{a.description}</div>
+                          <div>
+                            {a.temperature}°C / {a.humidity}%
+                          </div>
+                        </div>
                       </li>
                     ))}
                   </ul>

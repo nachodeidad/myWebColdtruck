@@ -5,6 +5,8 @@ import { User } from './index'
 
 export interface AlertInfo {
     IDAlert: number
+    type: string
+    description: string
     dateTime: string
     temperature?: number
     humidity?: number

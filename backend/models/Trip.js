@@ -4,9 +4,11 @@ const autoIncrementId = require("../plugins/autoIncrementId");
 const AlertSchema = new mongoose.Schema(
     {
         IDAlert: { type: Number, required: true },
+        type: { type: String, required: true },
+        description: { type: String, required: true },
         dateTime: { type: Date, required: true },
         temperature: Number,
-        humidity: Number
+        humidity: Number,
     },
     { _id: false }
 );

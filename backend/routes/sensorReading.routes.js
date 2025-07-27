@@ -58,9 +58,11 @@ router.post('/', async (req, res) => {
           });
           await alert.save();
 
-          // also push into trip.alerts
+          // also push into trip.alerts with alert details
           trip.alerts.push({
             IDAlert: alert._id,
+            type: alert.type,
+            description: alert.description,
             dateTime,
             temperature: tempReadingValue,
             humidity: humReadingValue,
