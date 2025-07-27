@@ -10,6 +10,7 @@ import MyTrips from "./MyTrips"
 import Profile from "./Profile/Profile"
 import { Sidebar } from "./Sidebar"
 import UserManagement from "./UserManagement"
+import Alerts from "./Alerts"
 
 const MainLayout: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState("Dashboard")
@@ -31,12 +32,7 @@ const MainLayout: React.FC = () => {
       case "Boxs":
         return <BoxManagement />
       case "Alerts":
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold">Alertas del Sistema</h2>
-            <p>Sección en desarrollo...</p>
-          </div>
-        )
+        return <Alerts />
       case "Temperatures":
         return (
           <div className="p-6">
