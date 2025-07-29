@@ -68,5 +68,7 @@ export interface AuthContextType {
 
 export * from "./Rute";
 export * from "./Trip";
-export * from "./Truck"
+export * from "./Truck";
+export * from "./Alert";
+export * from "./SensorReading";
 

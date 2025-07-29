@@ -14,6 +14,8 @@ const ruteModel = require('./models/Rute');
 const truckModel = require('./models/Truck');
 const tripModel = require('./models/Trip');
 const cargoTypeModel = require('./models/CargoType');
+const alertModel = require('./models/Alert');
+const sensorReadingModel = require('./models/SensorReading');
 
 
 // Middleware
@@ -31,6 +33,8 @@ app.use('/api/boxs', require('./routes/box.routes'))
 app.use('/api/cargoType', require('./routes/cargoType.routes'))
 app.use('/api/sensors', require('./routes/sensor.routes'))
 app.use('/api/sensor_box', require('./routes/sensor_box.routes'))
+app.use('/api/alerts', require('./routes/alert.routes'))
+app.use('/api/sensor_readings', require('./routes/sensorReading.routes'))
 
 // MongoDB connection
 mongoose
