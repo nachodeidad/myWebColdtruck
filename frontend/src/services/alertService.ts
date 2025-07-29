@@ -1,14 +1,9 @@
-import apiLocalHost from './apiLocalHost';
-import type { Alert } from '../types/Alert';
+import { Alert } from "../types/Alert";
+import apiLocalHost from "./apiLocalHost";
 
 const BASE_URL = '/alerts';
 
 export const getAlerts = async (): Promise<Alert[]> => {
-    const { data } = await apiLocalHost.get<Alert[]>(BASE_URL);
-    return data;
-};
-
-export const getAlertsByTruck = async () => {
-    const { data } = await apiLocalHost.get(BASE_URL + '/byTruck');
-    return data;
+  const { data } = await apiLocalHost.get<Alert[]>(BASE_URL);
+  return data;
 };
