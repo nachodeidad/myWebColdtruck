@@ -113,7 +113,7 @@ const ModalEditBox: React.FC<Props> = ({ isOpen, onClose, box, onSave }) => {
                         {["length", "width", "height", "maxWeigth"].map((field) => (
                             <div key={field}>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    {field === 'maxWeigth' ? 'Max Weight (kg)' : `${field.charAt(0).toUpperCase() + field.slice(1)} (cm)`}
+                                    {field === 'maxWeigth' ? 'Max Weight (kg)' : `${field.charAt(0).toUpperCase() + field.slice(1)} (m)`}
                                 </label>
                                 <input
                                     type="number"

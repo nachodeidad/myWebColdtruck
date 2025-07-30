@@ -14,33 +14,37 @@ const RegisterUserModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center px-4">
         {/* Background overlay */}
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
-
+        <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
+        
         {/* Modal */}
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                    <UserPlusIcon className="h-6 w-6 text-blue-600" />
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Register New User</h3>
+        <div className="relative z-10 max-w-4xl w-full bg-white rounded-2xl shadow-xl">
+          {/* Header with gradient background */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 flex justify-between items-start w-full">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center">
+                  <UserPlusIcon className="h-6 w-6 text-white" />
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="bg-white rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <XIcon className="h-6 w-6" />
-              </button>
+              <div className="ml-4">
+                <h3 className="text-2xl font-bold text-white">Register New User</h3>
+                <p className="text-blue-100 mt-1">Add a new user to the system.</p>
+              </div>
             </div>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-gray-300 transition"
+              aria-label="Close modal"
+            >
+              <XIcon className="h-6 w-6" />
+            </button>
+          </div>
 
+          {/* Content */}
+          <div className="p-8">
             <RegisterForm onSuccess={onSuccess} />
           </div>
         </div>

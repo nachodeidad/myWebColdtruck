@@ -1,15 +1,56 @@
 import React, { useState } from "react";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
-import { MapPin, Thermometer, Droplets, Save, RotateCcw, AlertCircle, Loader2, Search } from "lucide-react";
+import {
+  MapPin,
+  Thermometer,
+  Droplets,
+  Save,
+  RotateCcw,
+  AlertCircle,
+  Loader2,
+  Search,
+  Map as MapIcon,
+} from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import L from "leaflet";
 import { useAuth } from "../../../contexts/AuthContext";
 import { createRute } from "../../../services/ruteService";
 import type { Rute } from "../../../types/Rute";
+
+type LocationPickerProps = {
+  onPick: (coords: [number, number]) => void;
+};
+
+// Icono para los marcadores del mapa
+const pinIcon = new L.Icon({
+  iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-red.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
+// Icono diferente para el marcador temporal
+const tempPinIcon = new L.Icon({
+  iconUrl: "https://cdn.jsdelivr.net/gh/pointhi/leaflet-color-markers@master/img/marker-icon-blue.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
 
 interface Props {
   onCreated: (rute: Rute) => void;
 }
 
 const provider = new OpenStreetMapProvider();
+
+function LocationPicker({ onPick }: LocationPickerProps) {
+  useMapEvents({
+    click(e) {
+      onPick([e.latlng.lng, e.latlng.lat]);
+    },
+  });
+  return null;
+}
 
 export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
   const { user } = useAuth();
@@ -33,6 +74,10 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Estado para selección en mapa - SEPARADO para no interferir
+  const [tempSelection, setTempSelection] = useState<{ coords: [number, number] } | null>(null);
+  const [selecting, setSelecting] = useState<"origin" | "destination" | null>(null);
+
   // Busca lugares para origen/destino
   const handleOriginSearch = async () => {
     const results = await provider.search({ query: originQuery });
@@ -43,10 +88,10 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
     setDestinationResults(results);
   };
 
-  // Selecciona resultado
+  // Selecciona resultado búsqueda
   const selectOrigin = (result: any) => {
     setOrigin({
-      coords: [parseFloat(result.x), parseFloat(result.y)], // [lng, lat]
+      coords: [parseFloat(result.x), parseFloat(result.y)],
       address: result.label,
     });
     setOriginQuery(result.label);
@@ -55,7 +100,7 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
 
   const selectDestination = (result: any) => {
     setDestination({
-      coords: [parseFloat(result.x), parseFloat(result.y)], // [lng, lat]
+      coords: [parseFloat(result.x), parseFloat(result.y)],
       address: result.label,
     });
     setDestinationQuery(result.label);
@@ -69,6 +114,38 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
     setDestination(null);
     setDestinationQuery("");
     setDestinationResults([]);
+    setTempSelection(null);
+    setSelecting(null);
+  };
+
+  // Función para confirmar la selección temporal
+  const confirmTempSelection = () => {
+    if (!tempSelection) return;
+
+    const addressText = `Point: ${tempSelection.coords[1].toFixed(5)}, ${tempSelection.coords[0].toFixed(5)}`;
+
+    if (selecting === "origin") {
+      setOrigin({
+        coords: tempSelection.coords,
+        address: addressText,
+      });
+      setOriginQuery(addressText);
+    } else if (selecting === "destination") {
+      setDestination({
+        coords: tempSelection.coords,
+        address: addressText,
+      });
+      setDestinationQuery(addressText);
+    }
+
+    // Limpiar estado temporal
+    setTempSelection(null);
+    setSelecting(null);
+  };
+
+  // Función para cancelar selección temporal
+  const cancelTempSelection = () => {
+    setTempSelection(null);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,11 +177,11 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
       minHum: Number(form.minHum),
       origin: {
         type: "Point" as const,
-        coordinates: origin.coords, // [lng, lat]
+        coordinates: origin.coords,
       },
       destination: {
         type: "Point" as const,
-        coordinates: destination.coords, // [lng, lat]
+        coordinates: destination.coords,
       },
       IDAdmin: Number(user.id),
     };
@@ -130,12 +207,13 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
     }
   };
 
+  // ----------- UI ---------------------
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
       <div className="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6">
         <h2 className="text-2xl font-bold text-white">Create New Route</h2>
         <p className="text-green-100 mt-1">
-          Define route parameters and select addresses (OpenStreetMap)
+          Define route parameters and select addresses (OpenStreetMap or Interactive Map)
         </p>
       </div>
 
@@ -235,8 +313,157 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
           {/* Address Search Section */}
           <div className="bg-slate-50 p-6 rounded-xl">
             <h4 className="text-lg font-semibold text-slate-900 mb-4">
-              Route Points (OpenStreetMap)
+              Route Points
             </h4>
+
+            {/* BOTONES para seleccionar en mapa */}
+            <div className="flex flex-wrap gap-4 mb-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelecting("origin");
+                  setTempSelection(null);
+                }}
+                className={`inline-flex items-center px-3 py-2 rounded-lg gap-2 transition-colors ${
+                  selecting === "origin" 
+                    ? "bg-indigo-700 text-white" 
+                    : "bg-indigo-600 text-white hover:bg-indigo-700"
+                }`}
+                disabled={loading}
+              >
+                <MapIcon className="h-4 w-4" />
+                {selecting === "origin" ? "Seleccionando origen..." : "Seleccionar origen en mapa"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelecting("destination");
+                  setTempSelection(null);
+                }}
+                className={`inline-flex items-center px-3 py-2 rounded-lg gap-2 transition-colors ${
+                  selecting === "destination" 
+                    ? "bg-indigo-700 text-white" 
+                    : "bg-indigo-600 text-white hover:bg-indigo-700"
+                }`}
+                disabled={loading}
+              >
+                <MapIcon className="h-4 w-4" />
+                {selecting === "destination" ? "Seleccionando destino..." : "Seleccionar destino en mapa"}
+              </button>
+            </div>
+
+            {/* MODO MAPA */}
+            {selecting && (
+              <div className="mb-6">
+                <div className="mb-2 text-slate-800 font-medium bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  📍 Haz clic en el mapa para seleccionar {selecting === "origin" ? "el origen" : "el destino"}
+                  {tempSelection && (
+                    <div className="mt-2 text-blue-700">
+                      ✓ Punto seleccionado: {tempSelection.coords[1].toFixed(5)}, {tempSelection.coords[0].toFixed(5)}
+                    </div>
+                  )}
+                </div>
+                
+                <MapContainer
+                  center={
+                    // Si hay una coordenada previa, centra ahí, si no, el centro default
+                    selecting === "origin" && origin
+                      ? [origin.coords[1], origin.coords[0]]
+                      : selecting === "destination" && destination
+                      ? [destination.coords[1], destination.coords[0]]
+                      : [32.51, -117.02]
+                  }
+                  zoom={12}
+                  style={{ height: 350, width: "100%" }}
+                  className="rounded-xl border shadow"
+                >
+                  <TileLayer
+                    attribution='&copy; OpenStreetMap contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <LocationPicker
+                    onPick={(coords) => setTempSelection({ coords })}
+                  />
+
+                  {/* Marcador temporal - AZUL */}
+                  {tempSelection && (
+                    <Marker 
+                      position={[tempSelection.coords[1], tempSelection.coords[0]]} 
+                      icon={tempPinIcon}
+                    >
+                      <Popup>
+                        <div className="text-center">
+                          <div className="font-semibold mb-2">¿Usar este punto?</div>
+                          <div className="text-sm text-gray-600 mb-3">
+                            {tempSelection.coords[1].toFixed(5)}, {tempSelection.coords[0].toFixed(5)}
+                          </div>
+                          <div className="flex gap-2 justify-center">
+                            <button
+                              onClick={confirmTempSelection}
+                              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                            >
+                              ✓ Confirmar
+                            </button>
+                            <button
+                              onClick={cancelTempSelection}
+                              className="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500 text-sm"
+                            >
+                              ✗ Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )}
+
+                  {/* Marcadores confirmados - ROJOS */}
+                  {origin && (
+                    <Marker position={[origin.coords[1], origin.coords[0]]} icon={pinIcon}>
+                      <Popup>
+                        <div>
+                          <div className="font-semibold text-green-700">🚀 Origen</div>
+                          <div className="text-sm">{origin.address}</div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )}
+                  {destination && (
+                    <Marker position={[destination.coords[1], destination.coords[0]]} icon={pinIcon}>
+                      <Popup>
+                        <div>
+                          <div className="font-semibold text-red-700">🎯 Destino</div>
+                          <div className="text-sm">{destination.address}</div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )}
+                </MapContainer>
+                
+                <div className="mt-3 flex gap-2">
+                  {tempSelection && (
+                    <button
+                      type="button"
+                      onClick={confirmTempSelection}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      ✓ Confirmar selección
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelecting(null);
+                      setTempSelection(null);
+                    }}
+                    className="px-4 py-2 bg-slate-300 hover:bg-slate-400 text-slate-800 rounded-lg transition-colors"
+                  >
+                    Cancelar selección
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Selección por texto/búsqueda */}
             <div className="space-y-4">
               {/* Origin search */}
               <div className="mb-3">
@@ -275,11 +502,14 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
                   </ul>
                 )}
                 {origin && (
-                  <div className="mt-2 text-green-700 text-sm">
-                    <b>Selected:</b> {origin.address}
+                  <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="text-green-700 text-sm">
+                      <b>🚀 Origen seleccionado:</b> {origin.address}
+                    </div>
                   </div>
                 )}
               </div>
+              
               {/* Destination search */}
               <div>
                 <label className="block font-medium mb-1">
@@ -317,11 +547,14 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
                   </ul>
                 )}
                 {destination && (
-                  <div className="mt-2 text-green-700 text-sm">
-                    <b>Selected:</b> {destination.address}
+                  <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="text-red-700 text-sm">
+                      <b>🎯 Destino seleccionado:</b> {destination.address}
+                    </div>
                   </div>
                 )}
               </div>
+              
               {(origin || destination) && (
                 <button
                   type="button"
@@ -330,7 +563,7 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
                   disabled={loading}
                 >
                   <RotateCcw className="h-4 w-4" />
-                  Clear Points
+                  Clear All Points
                 </button>
               )}
             </div>

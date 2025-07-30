@@ -31,7 +31,7 @@ const UserManagement: React.FC = () => {
       setIsLoading(true)
       setError("")
       const response = await authAPI.getAllUsers()
-          console.log("Respuesta de getAllUsers:", response)  // <-- AGREGA ESTO
+      console.log("Respuesta de getAllUsers:", response)
       setUsers(response)
     } catch (error: any) {
       console.error("Error loading users:", error)
@@ -114,15 +114,15 @@ const UserManagement: React.FC = () => {
   }
 
   const statusStyles = {
-    Available:        'bg-green-100  text-green-800',
-    'On Trip':        'bg-blue-100   text-blue-800',
+    Available: 'bg-green-100  text-green-800',
+    'On Trip': 'bg-blue-100   text-blue-800',
     'Unavailable': 'bg-yellow-100 text-yellow-800',
-    Disabled:         'bg-red-100   text-red-800',
+    Disabled: 'bg-red-100   text-red-800',
   };
 
   if (currentUser?.role !== "admin") {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 z-10">
+      <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg shadow-sm">
             <div className="flex items-center">
@@ -147,24 +147,27 @@ const UserManagement: React.FC = () => {
   }
 
   return (
-<div className="min-h-screen w-full relative bg-white z-0">
-  {/* Cool Blue Glow Top */}
-  <div
-    className="absolute inset-0 z-[-1]"
-    style={{
-      background: "#ffffff",
-      backgroundImage: `
-        radial-gradient(
-          circle at top center,
-          rgba(70, 130, 180, 0.5),
-          transparent 70%
-        )
-      `,
-      filter: "blur(80px)",
-      backgroundRepeat: "no-repeat",
-    }}
-  />
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen w-full relative bg-white">
+      {/* Cool Blue Glow Top - Removido z-index negativo */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "#ffffff",
+          backgroundImage: `
+            radial-gradient(
+              circle at top center,
+              rgba(70, 130, 180, 0.5),
+              transparent 70%
+            )
+          `,
+          filter: "blur(80px)",
+          backgroundRepeat: "no-repeat",
+          zIndex: 1,
+        }}
+      />
+      
+      {/* Contenido principal con z-index mayor */}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-10">
@@ -176,12 +179,12 @@ const UserManagement: React.FC = () => {
                   </div>
                   <h1 className="text-4xl font-bold text-slate-900">User management</h1>
                 </div>
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <span className="text-sm">Total users:</span>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                      {users.length}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2 text-slate-600">
+                  <span className="text-sm">Total users:</span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                    {users.length}
+                  </span>
+                </div>
               </div>
 
               <div className="flex-shrink-0">
@@ -214,15 +217,6 @@ const UserManagement: React.FC = () => {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Register Modal */}
-          {showRegisterModal && (
-            <RegisterUserModal
-              isOpen={showRegisterModal}
-              onClose={() => setShowRegisterModal(false)}
-              onSuccess={handleUserRegistered}
-            />
           )}
 
           {/* Search Bar */}
@@ -347,11 +341,11 @@ const UserManagement: React.FC = () => {
                           </td>
                           <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500">
                             <span
-                                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                                  ${statusStyles[user.status] || statusStyles.Disabled
-                                }`}
-                              >
-                                {user.status}
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                ${statusStyles[user.status] || statusStyles.Disabled
+                              }`}
+                            >
+                              {user.status}
                             </span>
                           </td>
                           <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500">
@@ -496,6 +490,13 @@ const UserManagement: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Register Modal - Renderizado fuera del contenido principal */}
+      <RegisterUserModal
+        isOpen={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onSuccess={handleUserRegistered}
+      />
     </div>
   )
 }

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { AlertCircle, Calendar, Loader2, MapPin, Plus, Route, Truck, User } from "lucide-react"
+import { AlertCircle, Calendar, ChevronDown, Filter, Loader2, MapPin, Plus, Route, Search, Truck, User, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useAuth } from "../../../contexts/AuthContext"
 import { authAPI } from "../../../services/api"
@@ -23,6 +23,7 @@ const TripManagement: React.FC = () => {
   const [drivers, setDrivers] = useState<UserType[]>([])
   const [trucks, setTrucks] = useState<TruckType[]>([])
   const [trips, setTrips] = useState<Trip[]>([])
+  const [filteredTrips, setFilteredTrips] = useState<Trip[]>([])
   const [cargoTypes, setCargoTypes] = useState<CargoType[]>([])
   const [boxs, setBoxs] = useState<Box[]>([])
   const [selectedRute, setSelectedRute] = useState<Rute | null>(null)
@@ -34,6 +35,24 @@ const TripManagement: React.FC = () => {
   const [showRuteModal, setShowRuteModal] = useState(false)
   const [showRuteForm, setShowRuteForm] = useState(false)
   const [minDateTime, setMinDateTime] = useState('');
+
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("")
+  const [dateFilter, setDateFilter] = useState("")
+  const [showFilters, setShowFilters] = useState(false)
+  
+  // Dropdown states for searchable selects
+  const [driverSearch, setDriverSearch] = useState("")
+  const [showDriverDropdown, setShowDriverDropdown] = useState(false)
+  const [ruteSearch, setRuteSearch] = useState("")
+  const [showRuteDropdown, setShowRuteDropdown] = useState(false)
+  const [truckSearch, setTruckSearch] = useState("")
+  const [showTruckDropdown, setShowTruckDropdown] = useState(false)
+  const [boxSearch, setBoxSearch] = useState("")
+  const [showBoxDropdown, setShowBoxDropdown] = useState(false)
+  const [cargoSearch, setCargoSearch] = useState("")
+  const [showCargoDropdown, setShowCargoDropdown] = useState(false)
 
   useEffect(() => {
     const now = new Date();
@@ -53,6 +72,46 @@ const TripManagement: React.FC = () => {
   useEffect(() => {
     loadData()
   }, [])
+
+  // Filter trips based on search and filters
+  useEffect(() => {
+    let filtered = trips
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(trip => {
+        const driverName = typeof trip.IDDriver === "object" 
+          ? `${trip.IDDriver.name} ${trip.IDDriver.lastName}`.toLowerCase()
+          : String(trip.IDDriver).toLowerCase()
+        const ruteName = typeof trip.IDRute === "object" 
+          ? trip.IDRute.name.toLowerCase()
+          : String(trip.IDRute).toLowerCase()
+        const truckPlates = typeof trip.IDTruck === "object" 
+          ? trip.IDTruck.plates.toLowerCase()
+          : String(trip.IDTruck).toLowerCase()
+        
+        return driverName.includes(searchTerm.toLowerCase()) ||
+               ruteName.includes(searchTerm.toLowerCase()) ||
+               truckPlates.includes(searchTerm.toLowerCase())
+      })
+    }
+
+    // Status filter
+    if (statusFilter) {
+      filtered = filtered.filter(trip => trip.status === statusFilter)
+    }
+
+    // Date filter
+    if (dateFilter) {
+      const filterDate = new Date(dateFilter)
+      filtered = filtered.filter(trip => {
+        const tripDate = new Date(trip.scheduledDepartureDate)
+        return tripDate.toDateString() === filterDate.toDateString()
+      })
+    }
+
+    setFilteredTrips(filtered)
+  }, [trips, searchTerm, statusFilter, dateFilter])
 
   const loadData = async () => {
     try {
@@ -104,27 +163,27 @@ const TripManagement: React.FC = () => {
     }
 
     if (name === "scheduledDepartureDate") {
-    if (form.scheduledArrivalDate && new Date(form.scheduledArrivalDate) < new Date(value)) {
-      setForm((prev) => ({
-        ...prev,
-        scheduledDepartureDate: value,
-        scheduledArrivalDate: "",
-      }));
-      return;
+      if (form.scheduledArrivalDate && new Date(form.scheduledArrivalDate) < new Date(value)) {
+        setForm((prev) => ({
+          ...prev,
+          scheduledDepartureDate: value,
+          scheduledArrivalDate: "",
+        }));
+        return;
+      }
     }
-  }
 
-  if (name === "scheduledArrivalDate") {
-    if (form.scheduledDepartureDate && new Date(value) < new Date(form.scheduledDepartureDate)) {
-      alert("Arrival date cannot be before the departure date.");
-      return;
+    if (name === "scheduledArrivalDate") {
+      if (form.scheduledDepartureDate && new Date(value) < new Date(form.scheduledDepartureDate)) {
+        alert("Arrival date cannot be before the departure date.");
+        return;
+      }
     }
-  }
 
-  setForm((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   const handleSubmit = async () => {
@@ -158,6 +217,12 @@ const TripManagement: React.FC = () => {
         IDCargoType: "",
         IDBox: "",
       })
+      // Clear search states
+      setDriverSearch("")
+      setRuteSearch("")
+      setTruckSearch("")
+      setBoxSearch("")
+      setCargoSearch("")
       setSuccess("Trip assigned successfully!")
       setTimeout(() => setSuccess(""), 3000)
       loadData()
@@ -185,6 +250,130 @@ const TripManagement: React.FC = () => {
       >
         {config.label}
       </span>
+    )
+  }
+
+  const clearFilters = () => {
+    setSearchTerm("")
+    setStatusFilter("")
+    setDateFilter("")
+  }
+
+  // Searchable select component
+  const SearchableSelect = ({ 
+    data, 
+    value, 
+    onSelect, 
+    searchValue, 
+    onSearchChange, 
+    show, 
+    onToggle, 
+    placeholder, 
+    displayField, 
+    idField = "_id",
+    icon: Icon 
+  }: {
+    data: any[]
+    value: string
+    onSelect: (value: string) => void
+    searchValue: string
+    onSearchChange: (value: string) => void
+    show: boolean
+    onToggle: (show: boolean) => void
+    placeholder: string
+    displayField: string | ((item: any) => string)
+    idField?: string
+    icon: React.ComponentType<any>
+  }) => {
+    const filteredData = data.filter(item => {
+      const display = typeof displayField === 'function' 
+        ? displayField(item) 
+        : item[displayField]
+      return display.toLowerCase().includes(searchValue.toLowerCase())
+    })
+
+    const selectedItem = data.find(item => String(item[idField]) === value)
+    const displayValue = selectedItem 
+      ? (typeof displayField === 'function' ? displayField(selectedItem) : selectedItem[displayField])
+      : ""
+
+    // Handle click outside to close dropdown
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        const target = event.target as Element
+        if (show && !target.closest(`[data-dropdown-id="${placeholder}"]`)) {
+          onToggle(false)
+        }
+      }
+
+      if (show) {
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }, [show, onToggle, placeholder])
+
+    return (
+      <div className="relative" data-dropdown-id={placeholder}>
+        <div 
+          className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent hover:border-slate-400 cursor-pointer flex items-center justify-between"
+          onClick={() => onToggle(!show)}
+        >
+          <div className="flex items-center gap-2 flex-1">
+            <Icon className="h-4 w-4 text-slate-500" />
+            <span className={`${displayValue ? 'text-slate-900' : 'text-slate-500'}`}>
+              {displayValue || placeholder}
+            </span>
+          </div>
+          <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${show ? 'rotate-180' : ''}`} />
+        </div>
+        
+        {show && (
+          <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-hidden">
+            <div className="p-3 border-b border-slate-100">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => {
+                    e.stopPropagation()
+                    onSearchChange(e.target.value)
+                  }}
+                  onFocus={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                  placeholder={`Search ${placeholder.toLowerCase()}...`}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-40 overflow-y-auto">
+              {filteredData.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm">No results found</div>
+              ) : (
+                filteredData.map((item) => {
+                  const display = typeof displayField === 'function' ? displayField(item) : item[displayField]
+                  const id = String(item[idField])
+                  return (
+                    <div
+                      key={id}
+                      className="px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-50 last:border-b-0"
+                      onMouseDown={(e) => {
+                        e.preventDefault() // Prevent input from losing focus
+                        onSelect(id)
+                        onToggle(false)
+                        onSearchChange("")
+                      }}
+                    >
+                      <div className="text-sm font-medium text-slate-900">{display}</div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     )
   }
 
@@ -221,11 +410,21 @@ const TripManagement: React.FC = () => {
                 </div>
                 <h1 className="text-4xl font-bold text-slate-900">Trip Management</h1>
               </div>
-              <div className="flex items-center gap-2 text-slate-600">
-                <span className="text-sm">Total trips:</span>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                  {trips.length}
-                </span>
+              <div className="flex items-center gap-4 text-slate-600">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Total trips:</span>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                    {trips.length}
+                  </span>
+                </div>
+                {(searchTerm || statusFilter || dateFilter) && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">Filtered:</span>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                      {filteredTrips.length}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -287,114 +486,100 @@ const TripManagement: React.FC = () => {
               {/* Driver Selection */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <User className="h-4 w-4 text-slate-500" />
                   Driver <span className="text-red-500">*</span>
                 </label>
-                <select
-                  name="IDDriver"
+                <SearchableSelect
+                  data={drivers}
                   value={form.IDDriver}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 appearance-none"
-                  disabled={submitting}
-                >
-                  <option value="">Select driver</option>
-                  {drivers.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name} {d.lastName}
-                    </option>
-                  ))}
-                </select>
+                  onSelect={(value) => handleChange({ target: { name: "IDDriver", value } } as any)}
+                  searchValue={driverSearch}
+                  onSearchChange={setDriverSearch}
+                  show={showDriverDropdown}
+                  onToggle={setShowDriverDropdown}
+                  placeholder="Select driver"
+                  displayField={(driver) => `${driver.name} ${driver.lastName}`}
+                  idField="id"
+                  icon={User}
+                />
               </div>
 
               {/* Route Selection */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <Route className="h-4 w-4 text-slate-500" />
                   Route <span className="text-red-500">*</span>
                 </label>
-                <select
-                  name="IDRute"
+                <SearchableSelect
+                  data={rutes}
                   value={form.IDRute}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 appearance-none"
-                  disabled={submitting}
-                >
-                  <option value="">Select route</option>
-                  {rutes.map((r) => (
-                    <option key={r._id} value={r._id}>
-                      {r.name}
-                    </option>
-                  ))}
-                </select>
+                  onSelect={(value) => handleChange({ target: { name: "IDRute", value } } as any)}
+                  searchValue={ruteSearch}
+                  onSearchChange={setRuteSearch}
+                  show={showRuteDropdown}
+                  onToggle={setShowRuteDropdown}
+                  placeholder="Select route"
+                  displayField="name"
+                  icon={Route}
+                />
               </div>
 
               {/* Truck Selection */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <Truck className="h-4 w-4 text-slate-500" />
                   Truck <span className="text-red-500">*</span>
                 </label>
-                <select
-                  name="IDTruck"
+                <SearchableSelect
+                  data={trucks}
                   value={form.IDTruck}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 appearance-none"
-                  disabled={submitting}
-                >
-                  <option value="">Select truck</option>
-                  {trucks.map((t) => (
-                    <option key={t._id} value={t._id}>
-                      {t.plates}
-                    </option>
-                  ))}
-                </select>
+                  onSelect={(value) => handleChange({ target: { name: "IDTruck", value } } as any)}
+                  searchValue={truckSearch}
+                  onSearchChange={setTruckSearch}
+                  show={showTruckDropdown}
+                  onToggle={setShowTruckDropdown}
+                  placeholder="Select truck"
+                  displayField="plates"
+                  icon={Truck}
+                />
               </div>
 
               {/* Box Selection */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <Truck className="h-4 w-4 text-slate-500" />
                   Box <span className="text-red-500">*</span>
                 </label>
-                <select
-                  name="IDBox"
+                <SearchableSelect
+                  data={boxs}
                   value={form.IDBox}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 appearance-none"
-                  disabled={submitting}
-                >
-                <option value="">Select Box</option>
-                  {boxs.map((b) => {
-                    const volume = (b.length * b.width * b.height).toFixed(0); // m³ redondeado
-                    return (
-                      <option key={b._id} value={b._id}>
-                        #{b._id} − {volume} m³ − {b.maxWeigth} Kg
-                      </option>
-                    );
-                  })}
-                </select>
+                  onSelect={(value) => handleChange({ target: { name: "IDBox", value } } as any)}
+                  searchValue={boxSearch}
+                  onSearchChange={setBoxSearch}
+                  show={showBoxDropdown}
+                  onToggle={setShowBoxDropdown}
+                  placeholder="Select box"
+                  displayField={(box) => {
+                    const volume = (box.length * box.width * box.height).toFixed(0)
+                    return `#${box._id} − ${volume} m³ − ${box.maxWeigth} Kg`
+                  }}
+                  icon={Truck}
+                />
               </div>
 
               {/* Cargo Type Selection */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <Truck className="h-4 w-4 text-slate-500" />
                   Cargo Type <span className="text-red-500">*</span>
                 </label>
-                <select
-                  name="IDCargoType"
+                <SearchableSelect
+                  data={cargoTypes}
                   value={form.IDCargoType}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 appearance-none"
-                  disabled={submitting}
-                >
-                  <option value="">Select Cargo Type</option>
-                  {cargoTypes.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                  onSelect={(value) => handleChange({ target: { name: "IDCargoType", value } } as any)}
+                  searchValue={cargoSearch}
+                  onSearchChange={setCargoSearch}
+                  show={showCargoDropdown}
+                  onToggle={setShowCargoDropdown}
+                  placeholder="Select cargo type"
+                  displayField="name"
+                  icon={Truck}
+                />
               </div>
 
               {/* Departure Date */}
@@ -471,11 +656,110 @@ const TripManagement: React.FC = () => {
           </div>
         )}
 
+        {/* Search and Filter Section */}
+        <div className="mb-6 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+          <div className="px-8 py-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-slate-900">Search & Filter Trips</h3>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <Filter className="h-4 w-4" />
+                {showFilters ? 'Hide Filters' : 'Show Filters'}
+              </button>
+            </div>
+          </div>
+
+          <div className="p-8">
+            {/* Search Bar */}
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by driver name, route, or truck plates..."
+                  className="w-full pl-12 pr-12 py-4 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 text-lg"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Filters */}
+            {showFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Status Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Status Filter</label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400"
+                  >
+                    <option value="">All Statuses</option>
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                {/* Date Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Departure Date</label>
+                  <input
+                    type="date"
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400"
+                  />
+                </div>
+
+                {/* Clear Filters */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 opacity-0">Actions</label>
+                  <button
+                    onClick={clearFilters}
+                    disabled={!searchTerm && !statusFilter && !dateFilter}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 disabled:bg-slate-25 disabled:text-slate-400 disabled:cursor-not-allowed text-slate-700 font-medium transition-all duration-200"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Trips Table */}
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
           <div className="px-8 py-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-            <h3 className="text-xl font-semibold text-slate-900">Scheduled Trips</h3>
-            <p className="text-slate-600 text-sm mt-1">Monitor and manage all scheduled trips</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-slate-900">Scheduled Trips</h3>
+                <p className="text-slate-600 text-sm mt-1">
+                  {filteredTrips.length === trips.length 
+                    ? `Showing all ${trips.length} trips`
+                    : `Showing ${filteredTrips.length} of ${trips.length} trips`
+                  }
+                </p>
+              </div>
+              {(searchTerm || statusFilter || dateFilter) && (
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Filter className="h-4 w-4" />
+                  <span>Filters active</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {loading ? (
@@ -485,11 +769,27 @@ const TripManagement: React.FC = () => {
                 <span className="text-lg">Loading trips...</span>
               </div>
             </div>
-          ) : trips.length === 0 ? (
+          ) : filteredTrips.length === 0 ? (
             <div className="text-center py-16">
               <Route className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">No trips scheduled</h3>
-              <p className="text-slate-600 mb-6">Start by assigning your first trip</p>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                {trips.length === 0 ? "No trips scheduled" : "No trips match your filters"}
+              </h3>
+              <p className="text-slate-600 mb-6">
+                {trips.length === 0 
+                  ? "Start by assigning your first trip" 
+                  : "Try adjusting your search or filter criteria"
+                }
+              </p>
+              {trips.length > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                  Clear Filters
+                </button>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -506,7 +806,13 @@ const TripManagement: React.FC = () => {
                       Truck
                     </th>
                     <th className="px-8 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                      Cargo & Box
+                    </th>
+                    <th className="px-8 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                       Departure
+                    </th>
+                    <th className="px-8 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                      Arrival
                     </th>
                     <th className="px-8 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                       Status
@@ -514,7 +820,7 @@ const TripManagement: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-100">
-                  {trips.map((trip) => (
+                  {filteredTrips.map((trip) => (
                     <tr key={trip._id} className="hover:bg-slate-50 transition-colors duration-150">
                       <td className="px-8 py-6 whitespace-nowrap">
                         <div className="flex items-center">
@@ -544,7 +850,32 @@ const TripManagement: React.FC = () => {
                       </td>
                       <td className="px-8 py-6 whitespace-nowrap">
                         <div className="text-sm text-slate-700">
-                          {new Date(trip.scheduledDepartureDate).toLocaleString()}
+                          <div className="font-medium">
+                            {typeof trip.IDCargoType === "object" && trip.IDCargoType ? (trip.IDCargoType as any).name : trip.IDCargoType}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            Box #{typeof trip.IDBox === "object" && trip.IDBox ? (trip.IDBox as any)._id : trip.IDBox}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <div className="text-sm text-slate-700">
+                          <div className="font-medium">
+                            {new Date(trip.scheduledDepartureDate).toLocaleDateString()}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {new Date(trip.scheduledDepartureDate).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <div className="text-sm text-slate-700">
+                          <div className="font-medium">
+                            {new Date(trip.scheduledArrivalDate).toLocaleDateString()}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {new Date(trip.scheduledArrivalDate).toLocaleTimeString()}
+                          </div>
                         </div>
                       </td>
                       <td className="px-8 py-6 whitespace-nowrap">{getStatusBadge(trip.status)}</td>

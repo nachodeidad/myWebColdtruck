@@ -95,11 +95,6 @@ const adminOptions = [
     title: "Alerts",
     hidden: false,
   },
-  {
-    icon: <TemperaturesIcon size={20} />,
-    title: "Temperatures",
-    hidden: false,
-  },
   // {
   //   icon: <ReportsIcon size={20} />,
   //   title: "Reports",
