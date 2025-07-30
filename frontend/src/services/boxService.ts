@@ -19,3 +19,9 @@ export const createBox = async (payload: Omit<Box, '_id'>): Promise<Box> => {
     const { data } = await apiLocalHost.post<Box>(BASE_URL, payload);
     return data;
 }
+
+export const updateBox = async (id: number, data: Partial<Box>) => {
+    const res = await apiLocalHost.put(`/boxs/${id}`, data)
+    return res.data
+}
+

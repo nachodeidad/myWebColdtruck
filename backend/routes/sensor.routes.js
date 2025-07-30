@@ -38,4 +38,26 @@ const router = express.Router();
         }
     });
 
+    router.put('/:id', async (req, res) => {
+        try {
+            const updatedSensor = await Sensor.findByIdAndUpdate(
+                req.params.id,
+                {
+                    type: req.body.type,
+                    status: req.body.status
+                },
+                { new: true, runValidators: true }
+            );
+
+            if (!updatedSensor) {
+                return res.status(404).json({ error: 'Sensor not found' });
+            }
+
+            res.json(updatedSensor);
+        } catch (error) {
+            console.error('PUT /sensors/:id', error);
+            res.status(400).json({ error: 'Error updating sensor' });
+        }
+    });
+
 module.exports = router;

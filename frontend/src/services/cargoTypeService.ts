@@ -12,3 +12,8 @@ export const createCargoType = async (payload: Omit<CargoType, '_id'>): Promise<
     const { data } = await apiLocalHost.post<CargoType>(BASE_URL, payload);
     return data;
 }
+
+export const updateCargoType = async (id: number, data: Partial<CargoType>) => {
+    const res = await apiLocalHost.put(`/cargoType/${id}`, data)
+    return res.data
+}

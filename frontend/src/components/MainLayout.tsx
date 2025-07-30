@@ -2,7 +2,8 @@
 
 import type React from "react"
 import { useState } from "react"
-import BoxManagement from "./Admin/Box&Cargo/BoxManagement"
+import AlertManagement from "./Admin/Alert/AlertManagement"
+import Management from "./Admin/Box&Cargo/Management"
 import TripManagement from "./Admin/Trip/TripManagement"
 import TruckManagement from "./Admin/Truck/TruckManagement"
 import Dashboard from "./Dashboard"
@@ -10,7 +11,6 @@ import MyTrips from "./MyTrips"
 import Profile from "./Profile/Profile"
 import { Sidebar } from "./Sidebar"
 import UserManagement from "./UserManagement"
-import AlertManagement from "./Admin/Alert/AlertManagement"
 
 const MainLayout: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState("Dashboard")
@@ -30,13 +30,13 @@ const MainLayout: React.FC = () => {
       case "Trips":
         return <TripManagement />
       case "Boxs":
-        return <BoxManagement />
+        return <Management />
       case "Alerts":
         return <AlertManagement />
       case "Temperatures":
         return (
           <div className="p-6">
-            <h2 className="text-2xl font-bold">Control de Temperaturas</h2>
+            <h2 className="text-2xl font-bold">Temperatures</h2>
             <p>Sección en desarrollo...</p>
           </div>
         )

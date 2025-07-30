@@ -19,3 +19,8 @@ export const createSensor = async (payload: Omit<Sensor, '_id'>): Promise<Sensor
     const { data } = await apiLocalHost.post<Sensor>(BASE_URL, payload);
     return data;
 }
+
+export const updateSensor = async (id: string, data: Partial<Sensor>) => {
+    const res = await apiLocalHost.put(`/sensors/${id}`, data)
+    return res.data
+}
