@@ -1,9 +1,9 @@
 "use client"
 
+import { X } from "lucide-react"
 import React from "react"
-import { X, Route as RouteIcon } from "lucide-react"
-import CreateRuteForm from "./CreateRuteForm"
 import type { Rute } from "../../../types/Rute"
+import CreateRuteForm from "./CreateRuteForm"
 
 interface Props {
   isOpen: boolean
@@ -23,14 +23,6 @@ const CreateRuteModal: React.FC<Props> = ({ isOpen, onClose, onCreated }) => {
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <RouteIcon className="h-6 w-6 text-green-600" />
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Create New Route</h3>
-                </div>
               </div>
               <button
                 onClick={onClose}

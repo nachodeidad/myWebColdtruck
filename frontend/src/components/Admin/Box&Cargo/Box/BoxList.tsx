@@ -1,7 +1,9 @@
 import { EditIcon, Plus } from "lucide-react"
 import React, { useEffect, useState } from 'react'
 import { getBoxs } from "../../../../services/boxService"
+import { getSensor_box2 } from "../../../../services/sensor_boxService2"
 import { Box as BoxType } from "../../../../types/Box"
+import type { Sensor_Box2 } from "../../../../types/Sensor_Box2"
 import ModalEditBox from "./ModalEditBox"
 import ModalRegisterBox from "./ModalRegisterBox"
 
@@ -10,6 +12,18 @@ const BoxList: React.FC = () => {
     const [showModal, setShowModal] = useState(false)
     const [showRegisterModal, setShowRegisterModal] = useState(false)
     const [boxes, setBoxes] = useState<BoxType[]>([])
+    const [sensor_box, setSensor_box] = useState<Sensor_Box2[]>([])
+
+    
+    const getSensorForBox = (boxId: number): string => {
+        const found = sensor_box.find(sb => sb.IDBox && typeof sb.IDBox !== "number" && sb.IDBox._id === boxId)
+
+        if (found?.IDSensor && typeof found.IDSensor !== "string") {
+            return found.IDSensor._id.toString()
+        }
+
+        return "-"
+    }
 
     const fetchBoxes = async () => {
         try {
@@ -35,6 +49,19 @@ const BoxList: React.FC = () => {
         setSelectedBox(null)
         fetchBoxes()
     }
+
+    const fetchSensor_box = async () => {
+        try {
+            const data = await getSensor_box2()
+            setSensor_box(data)
+        } catch (error) {
+            console.error("Error fetching Sensor_box:", error)
+        }
+    }
+
+    useEffect(() => {
+        fetchSensor_box()
+    }, [])
 
     const statusStyles = {
         Available: 'bg-green-100 text-green-800',
@@ -67,6 +94,7 @@ const BoxList: React.FC = () => {
                                 <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4">m³</th>
                                 <th className="px-6 py-4">Max Weight</th>
+                                <th className="px-6 py-4">SENSOR</th>
                                 <th className="px-6 py-4 text-center">Actions</th>
                             </tr>
                         </thead>
@@ -79,10 +107,18 @@ const BoxList: React.FC = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-slate-700">
+                                        <div>
                                         {((box.length * box.width * box.height)).toFixed(2)} m³
+                                        </div>
+                                        <div className="text-slate-400">
+                                            L:{box.length} W:{box.width} H:{box.height}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 text-slate-700">
                                         {box.maxWeigth} kg
+                                    </td>
+                                    <td className="px-6 py-4 text-slate-700">
+                                        {getSensorForBox(box._id)}
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <button

@@ -1,10 +1,10 @@
-"use client"
-
 import { Dialog } from "@headlessui/react"
 import { BoxIcon } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import { updateBox } from "../../../../services/boxService"
 import type { Box } from "../../../../types/Box"
+import { getSensor_boxAvailable } from "../../../../services/sensor_boxService"
+import type { Sensor } from "../../../../types/Sensor"
 
 interface Props {
     isOpen: boolean
@@ -109,7 +109,7 @@ const ModalEditBox: React.FC<Props> = ({ isOpen, onClose, box, onSave }) => {
                             </select>
                             {isLocked && <p className="text-xs text-red-500 mt-1">Status cannot be changed while the box is "On Trip".</p>}
                         </div>
-
+                        <div className="grid grid-cols-2 gap-4">
                         {["length", "width", "height", "maxWeigth"].map((field) => (
                             <div key={field}>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -125,6 +125,27 @@ const ModalEditBox: React.FC<Props> = ({ isOpen, onClose, box, onSave }) => {
                                 {errors[field] && <p className="text-xs text-red-500 mt-1">{errors[field]}</p>}
                             </div>
                         ))}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                            <div className="flex">
+                                <select
+                                    name="status"
+                                    value={form.status}
+                                    onChange={handleChange}
+                                    disabled={isLocked}
+                                    className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 ${isLocked ? 'bg-slate-100 cursor-not-allowed' : ''}`}
+                                >
+                                    {STATUS_OPTIONS.map(status => (
+                                        <option key={status} value={status}>{status}</option>
+                                    ))}
+                                </select>
+                                {isLocked && <p className="text-xs text-red-500 mt-1">Status cannot be changed while the box is "On Trip".</p>}
+                                <button className="">
+                                    
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="flex justify-end gap-2 mt-6">

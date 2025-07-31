@@ -11,12 +11,17 @@ import {
   RouteIcon as RoutesIcon,
   ThermometerIcon as TemperaturesIcon,
   TruckIcon,
-  UsersIcon
+  UsersIcon,
+  X
 } from "lucide-react"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useAuth } from "../contexts/AuthContext"
 import type { User } from "../types"
 
+interface SidebarProps {
+  selected: string
+  setSelected: (title: string) => void
+}
 
 interface OptionProps {
   icon?: React.ReactNode
@@ -38,128 +43,104 @@ interface ToggleCloseProps {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-interface SidebarProps {
-  selected: string
-  setSelected: (title: string) => void
-}
-
-type NavOption = {
-  icon: React.ReactNode
-  title: string
-  hidden: boolean
-}
-
-
 export const Sidebar: React.FC<SidebarProps> = ({ selected, setSelected }) => {
   const [open, setOpen] = useState<boolean>(true)
+  const [isMobile, setIsMobile] = useState<boolean>(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
   const { user, logout } = useAuth()
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   if (!user) return null
 
-  const handleLogout = () => {
-    logout()
-  }
+  const handleLogout = () => logout()
 
-  const getNavigationOptions = () => {
-    const commonOptions = [
-  {
-    icon: <HomeIcon size={20} />,
-    title: "Dashboard",
-    hidden: false,
-  },
-]
+  const navigationOptions = user.role === "admin"
+    ? [
+        { icon: <HomeIcon size={20} />, title: "Dashboard", hidden: false },
+        { icon: <UsersIcon size={20} />, title: "Users", hidden: false },
+        { icon: <TruckIcon size={20} />, title: "Trucks", hidden: false },
+        { icon: <RoutesIcon size={20} />, title: "Trips", hidden: false },
+        { icon: <Box size={20} />, title: "Boxs", hidden: false },
+        { icon: <AlertsIcon size={20} />, title: "Alerts", hidden: false },
+      ]
+    : [
+        { icon: <HomeIcon size={20} />, title: "Dashboard", hidden: false },
+        { icon: <TruckIcon size={20} />, title: "Mi Camión", hidden: false },
+        { icon: <RoutesIcon size={20} />, title: "Mis Rutas", hidden: false },
+        { icon: <TemperaturesIcon size={20} />, title: "Temperaturas", hidden: false },
+      ]
 
-const adminOptions = [
-  {
-    icon: <UsersIcon size={20} />,
-    title: "Users",
-    hidden: false,
-  },
-  {
-    icon: <TruckIcon size={20} />,
-    title: "Trucks",
-    hidden: false,
-  },
-  {
-    icon: <RoutesIcon size={20} />,
-    title: "Trips",
-    hidden: false,
-  },
-  {
-    icon: <Box size={20} />,
-    title: "Boxs",
-    hidden: false,
-  },
-  {
-    icon: <AlertsIcon size={20} />,
-    title: "Alerts",
-    hidden: false,
-  },
-  // {
-  //   icon: <ReportsIcon size={20} />,
-  //   title: "Reports",
-  //   hidden: false,
-  // },
-]
-
-const driverOptions = [
-  {
-    icon: <TruckIcon size={20} />,
-    title: "Mi Camión",
-    hidden: false,
-  },
-  {
-    icon: <RoutesIcon size={20} />,
-    title: "Mis Rutas",
-    hidden: false,
-  },
-  {
-    icon: <TemperaturesIcon size={20} />,
-    title: "Temperaturas",
-    hidden: false,
-  },
-]
-
-
-    return user.role === "admin"
-      ? [...commonOptions, ...adminOptions]
-      : [...commonOptions, ...driverOptions]
-  }
-
-  const navigationOptions = getNavigationOptions()
-// el body del side
   return (
-    <motion.nav
-      layout
-      className={`sticky top-0 z-10 h-screen shrink-0 bg-blue-600 shadow-md transition-all duration-300 ease-in-out ${open ? "w-56 p-4" : "w-16 p-2"}`}
-    >
-      <TitleSection open={open} user={user} />
+    <>
+      {/* Botón para abrir en mobile */}
+      {isMobile && !isMobileMenuOpen && (
+        <button
+          className="fixed top-4 left-4 z-50 rounded bg-blue-600 p-2 border border-white  text-white shadow-lg"
+          onClick={() => setIsMobileMenuOpen(true)}
+        >
+          ☰
+        </button>
+      )}
 
-      <div className="mt-4 space-y-1">
-        {navigationOptions.map((option) => (
+      {/* Sidebar */}
+      <motion.nav
+        layout
+        className={`
+          ${isMobile ? 
+            `fixed top-0 left-0 h-full z-40 bg-blue-600 shadow-xl transition-transform transform ${
+              isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            }` 
+            : 
+            `sticky top-0 h-screen z-10 bg-blue-600`
+          }
+          ${open ? "w-56 p-4" : "w-16 p-2"} transition-all duration-300 ease-in-out
+        `}
+      >
+        <div className="grid items-center">
+          {isMobile && (
+            <button onClick={() => setIsMobileMenuOpen(false)} className="text-white p-1 pb-2 flex justify-end">
+              <X className=""/>
+            </button>
+          )}
+          <TitleSection open={open} user={user} />
+        </div>
+
+        <div className="mt-4 space-y-1">
+          {navigationOptions.map((option) => (
+            !option.hidden && (
+              <Option
+                key={option.title}
+                icon={option.icon}
+                title={option.title}
+                selected={selected}
+                setSelected={(title) => {
+                  setSelected(title)
+                  if (isMobile) setIsMobileMenuOpen(false)
+                }}
+                open={open}
+              />
+            )
+          ))}
           <Option
-            key={option.title}
-            icon={option.icon}
-            title={option.title}
+            icon={<LogoutIcon size={18} />}
+            title="Cerrar Sesión"
             selected={selected}
             setSelected={setSelected}
             open={open}
-            hidden={option.hidden}
+            onClick={handleLogout}
           />
-        ))}
+        </div>
 
-        <Option
-          icon={<LogoutIcon size={18} />}
-          title="Cerrar Sesión"
-          selected={selected}
-          setSelected={setSelected}
-          open={open}
-          onClick={handleLogout}
-        />
-      </div>
-
-      <ToggleClose open={open} setOpen={setOpen} />
-    </motion.nav>
+        {!isMobile && <ToggleClose open={open} setOpen={setOpen} />}
+      </motion.nav>
+    </>
   )
 }
 
@@ -170,7 +151,6 @@ const Option: React.FC<OptionProps> = ({ icon, title, selected, setSelected, ope
     onClick ? onClick() : setSelected(title)
   }
 
-  // botones del sidebar
   return (
     <motion.button
       layout
@@ -200,7 +180,6 @@ const TitleSection: React.FC<TitleSectionProps> = ({ open, user }) => {
     return roleLabels[role]
   }
 
-// titulo
   return (
     <motion.button
       layout
@@ -224,7 +203,7 @@ const TitleSection: React.FC<TitleSectionProps> = ({ open, user }) => {
     </motion.button>
   )
 }
-  // pa ocultar
+
 const ToggleClose: React.FC<ToggleCloseProps> = ({ open, setOpen }) => {
   return (
     <motion.button

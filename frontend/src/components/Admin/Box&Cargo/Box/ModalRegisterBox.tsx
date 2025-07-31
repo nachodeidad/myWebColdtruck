@@ -3,8 +3,7 @@ import { Box, Microchip, PencilRuler, Weight, X } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import { useAuth } from "../../../../contexts/AuthContext"
 import { createBox } from "../../../../services/boxService"
-import { getSensorsActive } from "../../../../services/sensorService"
-import { createSensor_Box } from "../../../../services/sensor_boxService"
+import { createSensor_Box, getSensor_boxAvailable } from "../../../../services/sensor_boxService"
 import type { Box as BoxType } from "../../../../types/Box"
 import type { Sensor } from "../../../../types/Sensor"
 
@@ -32,7 +31,7 @@ const ModalRegisterBox: React.FC<Props> = ({ isOpen, onClose, onBoxRegistered })
     useEffect(() => {
         const fetchSensors = async () => {
             try {
-                const data = await getSensorsActive()
+                const data = await getSensor_boxAvailable()
                 setSensors(data)
             } catch (error) {
                 console.error("Error fetching sensors:", error)

@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import L from "leaflet";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import {
-  MapPin,
-  Thermometer,
-  Droplets,
-  Save,
-  RotateCcw,
   AlertCircle,
+  Droplets,
   Loader2,
-  Search,
   Map as MapIcon,
+  MapPin,
+  RotateCcw,
+  RouteIcon,
+  Save,
+  Search,
+  Thermometer,
 } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
-import L from "leaflet";
+import React, { useState } from "react";
+import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import { useAuth } from "../../../contexts/AuthContext";
 import { createRute } from "../../../services/ruteService";
 import type { Rute } from "../../../types/Rute";
@@ -210,11 +211,16 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
   // ----------- UI ---------------------
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-      <div className="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6">
-        <h2 className="text-2xl font-bold text-white">Create New Route</h2>
-        <p className="text-green-100 mt-1">
-          Define route parameters and select addresses (OpenStreetMap or Interactive Map)
-        </p>
+      <div className="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6 flex gap-5">
+        <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+          <RouteIcon className="h-6 w-6 text-green-600" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-white">Create New Route</h2>
+          <p className="text-green-100 mt-1">
+            Define route parameters and select addresses (OpenStreetMap or Interactive Map)
+          </p>
+        </div>
       </div>
 
       <div className="p-8 space-y-8">
@@ -227,7 +233,7 @@ export const CreateRuteForm: React.FC<Props> = ({ onCreated }) => {
 
         {/* Route Information */}
         <div className="space-y-6">
-          <div className="bg-slate-50 p-6 rounded-xl">
+          <div className="bg-white p-6 rounded-xl">
             <h4 className="text-lg font-semibold text-slate-900 mb-4">
               Route Information
             </h4>

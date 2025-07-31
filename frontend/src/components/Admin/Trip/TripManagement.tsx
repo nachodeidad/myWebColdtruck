@@ -41,7 +41,7 @@ const TripManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState("")
   const [dateFilter, setDateFilter] = useState("")
   const [showFilters, setShowFilters] = useState(false)
-  
+
   // Dropdown states for searchable selects
   const [driverSearch, setDriverSearch] = useState("")
   const [showDriverDropdown, setShowDriverDropdown] = useState(false)
@@ -58,7 +58,7 @@ const TripManagement: React.FC = () => {
     const now = new Date();
     setMinDateTime(now.toISOString().slice(0, 16));
   }, []);
-  
+
   const [form, setForm] = useState({
     scheduledDepartureDate: "",
     scheduledArrivalDate: "",
@@ -80,19 +80,19 @@ const TripManagement: React.FC = () => {
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(trip => {
-        const driverName = typeof trip.IDDriver === "object" 
+        const driverName = typeof trip.IDDriver === "object"
           ? `${trip.IDDriver.name} ${trip.IDDriver.lastName}`.toLowerCase()
           : String(trip.IDDriver).toLowerCase()
-        const ruteName = typeof trip.IDRute === "object" 
+        const ruteName = typeof trip.IDRute === "object"
           ? trip.IDRute.name.toLowerCase()
           : String(trip.IDRute).toLowerCase()
-        const truckPlates = typeof trip.IDTruck === "object" 
+        const truckPlates = typeof trip.IDTruck === "object"
           ? trip.IDTruck.plates.toLowerCase()
           : String(trip.IDTruck).toLowerCase()
-        
+
         return driverName.includes(searchTerm.toLowerCase()) ||
-               ruteName.includes(searchTerm.toLowerCase()) ||
-               truckPlates.includes(searchTerm.toLowerCase())
+          ruteName.includes(searchTerm.toLowerCase()) ||
+          truckPlates.includes(searchTerm.toLowerCase())
       })
     }
 
@@ -260,18 +260,18 @@ const TripManagement: React.FC = () => {
   }
 
   // Searchable select component
-  const SearchableSelect = ({ 
-    data, 
-    value, 
-    onSelect, 
-    searchValue, 
-    onSearchChange, 
-    show, 
-    onToggle, 
-    placeholder, 
-    displayField, 
+  const SearchableSelect = ({
+    data,
+    value,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    show,
+    onToggle,
+    placeholder,
+    displayField,
     idField = "_id",
-    icon: Icon 
+    icon: Icon
   }: {
     data: any[]
     value: string
@@ -286,14 +286,14 @@ const TripManagement: React.FC = () => {
     icon: React.ComponentType<any>
   }) => {
     const filteredData = data.filter(item => {
-      const display = typeof displayField === 'function' 
-        ? displayField(item) 
+      const display = typeof displayField === 'function'
+        ? displayField(item)
         : item[displayField]
       return display.toLowerCase().includes(searchValue.toLowerCase())
     })
 
     const selectedItem = data.find(item => String(item[idField]) === value)
-    const displayValue = selectedItem 
+    const displayValue = selectedItem
       ? (typeof displayField === 'function' ? displayField(selectedItem) : selectedItem[displayField])
       : ""
 
@@ -314,7 +314,7 @@ const TripManagement: React.FC = () => {
 
     return (
       <div className="relative" data-dropdown-id={placeholder}>
-        <div 
+        <div
           className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent hover:border-slate-400 cursor-pointer flex items-center justify-between"
           onClick={() => onToggle(!show)}
         >
@@ -326,7 +326,7 @@ const TripManagement: React.FC = () => {
           </div>
           <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${show ? 'rotate-180' : ''}`} />
         </div>
-        
+
         {show && (
           <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-hidden">
             <div className="p-3 border-b border-slate-100">
@@ -431,7 +431,7 @@ const TripManagement: React.FC = () => {
             <div className="flex-shrink-0">
               <button
                 onClick={() => setShowRuteModal(!showRuteModal)}
-                className="group inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
+                className="group inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
               >
                 <Plus
                   className={`h-5 w-5 transition-transform duration-200 ${showRuteModal ? "rotate-45" : "group-hover:scale-110"}`}
@@ -658,52 +658,48 @@ const TripManagement: React.FC = () => {
 
         {/* Search and Filter Section */}
         <div className="mb-6 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          <div className="px-8 py-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-slate-900">Search & Filter Trips</h3>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-              >
-                <Filter className="h-4 w-4" />
-                {showFilters ? 'Hide Filters' : 'Show Filters'}
-              </button>
+          <div className="px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Search Bar */}
+            <div className="relative w-full md:max-w-md">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by driver, route or plates..."
+                className="w-full pl-12 pr-12 py-3 border border-slate-300 rounded-xl bg-white text-sm md:text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-slate-400"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
             </div>
+
+            {/* Toggle Filters Button */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-200 hover:bg-slate-300 rounded-lg transition"
+            >
+              <Filter className="h-4 w-4" />
+              {showFilters ? 'Hide Filters' : 'Show Filters'}
+            </button>
           </div>
 
-          <div className="p-8">
-            {/* Search Bar */}
-            <div className="mb-6">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by driver name, route, or truck plates..."
-                  className="w-full pl-12 pr-12 py-4 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400 text-lg"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Filters */}
-            {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Filters Section */}
+          {showFilters && (
+            <div className="px-6 pb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {/* Status Filter */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Status Filter</label>
+                <div>
+                  <label className="block mb-1 text-sm font-semibold text-slate-700">Status</label>
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-slate-400"
                   >
                     <option value="">All Statuses</option>
                     <option value="Scheduled">Scheduled</option>
@@ -714,31 +710,31 @@ const TripManagement: React.FC = () => {
                 </div>
 
                 {/* Date Filter */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Departure Date</label>
+                <div>
+                  <label className="block mb-1 text-sm font-semibold text-slate-700">Departure Date</label>
                   <input
                     type="date"
                     value={dateFilter}
                     onChange={(e) => setDateFilter(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-slate-400"
                   />
                 </div>
 
                 {/* Clear Filters */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 opacity-0">Actions</label>
+                <div className="flex flex-col justify-end">
                   <button
                     onClick={clearFilters}
                     disabled={!searchTerm && !statusFilter && !dateFilter}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 disabled:bg-slate-25 disabled:text-slate-400 disabled:cursor-not-allowed text-slate-700 font-medium transition-all duration-200"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 text-sm font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
                   >
-                    Clear All Filters
+                    Clear Filters
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+
 
         {/* Trips Table */}
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
@@ -747,7 +743,7 @@ const TripManagement: React.FC = () => {
               <div>
                 <h3 className="text-xl font-semibold text-slate-900">Scheduled Trips</h3>
                 <p className="text-slate-600 text-sm mt-1">
-                  {filteredTrips.length === trips.length 
+                  {filteredTrips.length === trips.length
                     ? `Showing all ${trips.length} trips`
                     : `Showing ${filteredTrips.length} of ${trips.length} trips`
                   }
@@ -776,8 +772,8 @@ const TripManagement: React.FC = () => {
                 {trips.length === 0 ? "No trips scheduled" : "No trips match your filters"}
               </h3>
               <p className="text-slate-600 mb-6">
-                {trips.length === 0 
-                  ? "Start by assigning your first trip" 
+                {trips.length === 0
+                  ? "Start by assigning your first trip"
                   : "Try adjusting your search or filter criteria"
                 }
               </p>

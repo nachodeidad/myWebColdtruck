@@ -82,7 +82,6 @@ const Management: React.FC = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header Section */}
                 <div>
                     <div className="mb-1">
                         <div className="flex lg:flex-row lg:items-center lg:justify-center gap-10">
@@ -138,7 +137,7 @@ const Management: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Renderizado condicional */}
+                    {/* Renderizado */}
                     {activeTab === 'boxes' && <BoxList />}
                     {activeTab === 'cargo' && <CargoTypeList />}
                     {activeTab === 'sensors' && <SensorList />}
