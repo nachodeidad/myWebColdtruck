@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 
 import { AlertCircle, Calendar, ChevronDown, Filter, Loader2, MapPin, Plus, Route, Search, Truck, User, X } from "lucide-react"
@@ -16,8 +14,10 @@ import { Box } from "../../../types/Box"
 import { CargoType } from "../../../types/CargoType"
 import MapView from "../../Map/MapView"
 import CreateRuteModal from "../Rute/CreateRuteModal"
+import ModalMoreTrip from "./ModalMoreTrip"
 
 const TripManagement: React.FC = () => {
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null)
   const { user } = useAuth()
   const [rutes, setRutes] = useState<Rute[]>([])
   const [drivers, setDrivers] = useState<UserType[]>([])
@@ -35,6 +35,8 @@ const TripManagement: React.FC = () => {
   const [showRuteModal, setShowRuteModal] = useState(false)
   const [showRuteForm, setShowRuteForm] = useState(false)
   const [minDateTime, setMinDateTime] = useState('');
+
+  const [showModalMore, setShowModalMore] = useState(false)
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("")
@@ -150,17 +152,19 @@ const TripManagement: React.FC = () => {
     setForm((prev) => ({ ...prev, [name]: value }))
     setError("")
 
-    if (name === "IDRute" && value) {
-      const r = rutes.find((rt) => rt._id === Number(value)) || null
-      setSelectedRute(r)
-      if (r) {
-        getRuteGeometry(r._id)
-          .then(setPath)
-          .catch(() => setPath([]))
-      } else {
-        setPath([])
-      }
-    }
+   if (name === "IDRute" && value) {
+  const r = rutes.find((rt) => rt._id === Number(value)) || null
+  setSelectedRute(r)
+  if (r) {
+    getRuteGeometry(r._id)
+      .then((geom) => setPath(geom))
+      .catch(() => setPath([]))
+  } else {
+    setPath([])
+  }
+}
+
+
 
     if (name === "scheduledDepartureDate") {
       if (form.scheduledArrivalDate && new Date(form.scheduledArrivalDate) < new Date(value)) {
@@ -817,7 +821,11 @@ const TripManagement: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-100">
                   {filteredTrips.map((trip) => (
-                    <tr key={trip._id} className="hover:bg-slate-50 transition-colors duration-150">
+                    <tr key={trip._id} onClick={() => {
+                        setSelectedTrip(trip);
+                        setShowModalMore(true);
+                      }}
+                      className="hover:bg-slate-50 transition-colors duration-150">
                       <td className="px-8 py-6 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
@@ -879,6 +887,13 @@ const TripManagement: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+              {selectedTrip && (
+                <ModalMoreTrip
+                  isOpen={showModalMore}
+                  trip={selectedTrip}
+                  onClose={() => setShowModalMore(false)}
+                />
+              )}
             </div>
           )}
         </div>
