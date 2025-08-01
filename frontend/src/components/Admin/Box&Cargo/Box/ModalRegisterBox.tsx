@@ -11,9 +11,10 @@ type Props = {
     isOpen: boolean
     onClose: () => void
     onBoxRegistered: () => void
+    refreshSensor: () => void
 }
 
-const ModalRegisterBox: React.FC<Props> = ({ isOpen, onClose, onBoxRegistered }) => {
+const ModalRegisterBox: React.FC<Props> = ({ isOpen, onClose, onBoxRegistered, refreshSensor }) => {
     const [sensors, setSensors] = useState<Sensor[]>([])
     const { user } = useAuth()
 
@@ -51,6 +52,8 @@ const ModalRegisterBox: React.FC<Props> = ({ isOpen, onClose, onBoxRegistered })
             const newSensorBox = {
                 IDSensor: formSensor_Box.IDSensor,
                 IDBox: Number(boxId),
+                dateStart: new Date().toISOString(),
+                dateEnd: null
             }
             await createSensor_Box(newSensorBox)
             setFormSensor_Box({ IDSensor: "", IDBox: "" })
@@ -94,6 +97,7 @@ const ModalRegisterBox: React.FC<Props> = ({ isOpen, onClose, onBoxRegistered })
             alert("Box registrada y sensor vinculado correctamente.")
 
             onBoxRegistered()
+            refreshSensor()
             onClose()
         } catch (error) {
             console.error("Error registering box or linking sensor:", error)

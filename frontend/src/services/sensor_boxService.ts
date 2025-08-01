@@ -1,4 +1,3 @@
-import { Import } from "lucide-react";
 import { Sensor_Box } from "../types/Sensor_Box";
 import apiLocalHost from "./apiLocalHost";
 import type { Sensor } from "../types/Sensor";

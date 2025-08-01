@@ -53,7 +53,7 @@ const ModalEditCargoType: React.FC<Props> = ({ isOpen, onClose, cargoType, onSav
                 <Dialog.Panel className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md z-10">
                     <p className="text-sm text-slate-500 mb-4">Cargo Type ID: #{cargoType._id}</p>
                     <Dialog.Title className="flex justify-star items-center text-2xl font-bold text-gray-50 mb-6 bg-blue-500 p-2 rounded-xl">
-                        <Boxes className="mx-3"/> Edit Cargo Type
+                        <Boxes className="mx-3" /> Edit Cargo Type
                     </Dialog.Title>
                     <div className="space-y-4">
                         <div>
@@ -78,16 +78,16 @@ const ModalEditCargoType: React.FC<Props> = ({ isOpen, onClose, cargoType, onSav
                             />
                         </div>
                     </div>
-                    <div className="flex justify-end gap-2 mt-6">
+                    <div className="flex w-full gap-2 mt-6">
                         <button
                             onClick={onClose}
-                            className="px-5 py-2 text-red-400 border-red-400 border  rounded-xl hover:bg-red-50"
+                            className="w-full px-5 py-2 text-red-400 border-red-400 border  rounded-xl hover:bg-red-50 font-semibold"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSubmit}
-                            className="px-5 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+                            className="w-full px-5 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold"
                         >
                             Save
                         </button>

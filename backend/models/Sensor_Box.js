@@ -7,7 +7,10 @@ const Sensor_BoxSchema = new mongoose.Schema(
         IDSensor: { type: String, required: true, ref: 'Sensor' },
         IDBox: { type: Number, required: true, ref: 'Box' },
         dateStart: { type: Date, required: true, default: Date.now },
-        dateEnd: { type: Date}
+        dateEnd: {
+            type: mongoose.Schema.Types.Mixed,
+            default: null
+        }
     }
 );
 

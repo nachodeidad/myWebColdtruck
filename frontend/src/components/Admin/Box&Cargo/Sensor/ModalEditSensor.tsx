@@ -90,16 +90,16 @@ const ModalEditSensor: React.FC<Props> = ({ isOpen, onClose, sensor, onSave }) =
             </div>
           </div>
 
-          <div className="flex justify-end mt-6 gap-2">
+          <div className="flex w-full gap-2 mt-6">
             <button
               onClick={onClose}
-              className="px-5 py-2 text-red-400 border-red-400 border  rounded-xl hover:bg-red-50"
+              className="w-full px-5 py-2 text-red-400 border-red-400 border  rounded-xl hover:bg-red-50 font-semibold"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
-              className="px-5 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600"
+              className="w-full px-5 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold"
             >
               Save
             </button>

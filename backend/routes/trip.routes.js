@@ -49,6 +49,24 @@ router.get('/specific', async (_req, res) => {
     }
 });
 
+router.get('/specific/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const trip = await Trip.findById(id)
+            .populate('IDDriver IDAdmin IDBox IDRute IDTruck IDCargoType');
+
+        if (!trip) {
+            return res.status(404).json({ error: 'Trip not found' });
+        }
+
+        return res.json(trip);
+    } catch (err) {
+        console.error('Error getting trip by ID:', err);
+        return res.status(500).json({ error: 'Error getting trip by ID' });
+    }
+});
+
 router.post('/', async (req, res) => {
     try {
         const {
