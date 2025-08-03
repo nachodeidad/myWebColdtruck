@@ -11,12 +11,30 @@ const api = axios.create({
   },
 })
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and block modifications for unavailable users
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token")
     if (token) {
       config.headers["x-auth-token"] = token
+    }
+    if (config.method && config.method.toLowerCase() !== "get") {
+      const userStr = localStorage.getItem("user")
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr) as User
+          if (user.status === "Unavailable") {
+            return Promise.reject({
+              response: { status: 403, data: { msg: "User unavailable" } },
+            })
+          }
+          if (user.status === "Disabled") {
+            return Promise.reject({
+              response: { status: 403, data: { msg: "Account disabled" } },
+            })
+          }
+        } catch {}
+      }
     }
     return config
   },
@@ -31,6 +49,14 @@ api.interceptors.response.use(
       localStorage.removeItem("token")
       localStorage.removeItem("user")
       window.location.href = "/login"
+    }
+    if (
+      error.response?.status === 403 &&
+      error.response.data?.msg === "Account disabled"
+    ) {
+      localStorage.removeItem("token")
+      localStorage.removeItem("user")
+      window.location.href = "/disabled"
     }
     return Promise.reject(error)
   },

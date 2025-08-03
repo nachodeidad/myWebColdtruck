@@ -5,6 +5,7 @@ const multer = require("multer")
 const cloudinary = require("../config/cloudinary")
 const User = require("../models/User")
 const auth = require("../middleware/auth")
+const restrictUnavailable = require("../middleware/restrictUnavailable")
 const mongoose = require("mongoose")
 
 const router = express.Router()
@@ -222,6 +223,10 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ msg: "Invalid credentials" })
     }
 
+    if (user.status === "Disabled") {
+      return res.status(403).json({ msg: "Account disabled" })
+    }
+
     const payload = {
       user: {
         id: Number(user._id),
@@ -258,7 +263,7 @@ router.get("/profile", auth, async (req, res) => {
 })
 
 // --- CHANGE PASSWORD ---
-router.put("/change-password", auth, async (req, res) => {
+router.put("/change-password", auth, restrictUnavailable, async (req, res) => {
   try {
     const userId = Number(req.user.id)
     const { currentPassword, newPassword } = req.body
@@ -308,6 +313,7 @@ router.get("/users", auth, async (req, res) => {
 router.put(
   "/users/:id",
   auth,
+  restrictUnavailable,
   (req, res, next) => {
     if (!req.params.id || !isValidUserId(req.params.id)) {
       return res.status(400).json({

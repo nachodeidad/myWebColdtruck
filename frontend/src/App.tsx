@@ -6,6 +6,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import AuthGuard from "./components/AuthGuard";
 import LoginForm from "./components/LoginForm";
 import LandingPage from "./pages/LandingPage";
+import AccountDisabled from "./pages/AccountDisabled";
 import MainLayout from "./components/MainLayout";
 
 const App: React.FC = () => {
@@ -16,6 +17,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Navigate to="/landing" replace />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/login" element={<LoginForm />} />
+          <Route path="/disabled" element={<AccountDisabled />} />
           <Route
             path="/main"
             element={

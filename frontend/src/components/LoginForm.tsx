@@ -34,6 +34,10 @@ const LoginForm: React.FC = () => {
         navigate("/main", { replace: true });
       } catch (error) {
         const axiosError = error as AxiosError<ApiError>;
+        if (axiosError.response?.status === 403) {
+          navigate("/disabled", { replace: true });
+          return;
+        }
         const message =
           axiosError.response?.data?.msg || "Error al iniciar sesión";
         setError("email", message);

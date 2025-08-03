@@ -285,11 +285,16 @@ const Profile: React.FC = () => {
                     </div>
                     <button
                         type="submit"
-                        disabled={changing}
+                        disabled={changing || user.status === "Unavailable"}
                         className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                     >
                         {changing ? "Updating..." : "Update Password"}
                     </button>
+                    {user.status === "Unavailable" && (
+                        <p className="mt-2 text-sm text-gray-500 text-center">
+                            Account marked as unavailable; password changes are disabled.
+                        </p>
+                    )}
                 </form>
             </div>
 
