@@ -1,4 +1,5 @@
 import { AlertCircle, Calendar, ChevronDown, Filter, Loader2, MapPin, Plus, Route, Search, Truck, User, X } from "lucide-react"
+import { Dialog } from "@headlessui/react"
 import type React from "react"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
@@ -33,9 +34,8 @@ const TripManagement: React.FC = () => {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [showRuteModal, setShowRuteModal] = useState(false)
-  const [showRuteForm, setShowRuteForm] = useState(false)
   const [minDateTime, setMinDateTime] = useState('');
-
+  const [showTripModal, setShowTripModal] = useState(false)
   const [showModalMore, setShowModalMore] = useState(false)
 
   // Search and filter states
@@ -112,6 +112,7 @@ const TripManagement: React.FC = () => {
       })
     }
 
+    filtered.sort((a, b) => Number(b._id) - Number(a._id))
     setFilteredTrips(filtered)
   }, [trips, searchTerm, statusFilter, dateFilter])
 
@@ -129,7 +130,8 @@ const TripManagement: React.FC = () => {
       setRutes(ruteData)
       setDrivers(userData.filter((u) => u.role === "driver"))
       setTrucks(truckData)
-      setTrips(tripData)
+      const sortedTrips = tripData.sort((a, b) => Number(b._id) - Number(a._id))
+      setTrips(sortedTrips)
       setCargoTypes(cargoTypeData)
       setBoxs(boxData)
     } catch (err) {
@@ -141,7 +143,6 @@ const TripManagement: React.FC = () => {
   }
 
   const handleRuteCreated = () => {
-    setShowRuteForm(false)
     setSuccess("Route created successfully!")
     setTimeout(() => setSuccess(""), 3000)
     loadData()
@@ -238,6 +239,7 @@ const TripManagement: React.FC = () => {
       toast.success("Trip added successfully!")
       setTimeout(() => setSuccess(""), 3000)
       loadData()
+      setShowTripModal(false)
     } catch (err) {
       console.error(err)
       toast.error("Error adding trip!")
@@ -441,7 +443,14 @@ const TripManagement: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex gap-4">
+              <button
+                onClick={() => setShowTripModal(true)}
+                className="group inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
+              >
+                <Plus className="h-5 w-5" />
+                Add New Trip
+              </button>
               <button
                 onClick={() => setShowRuteModal(!showRuteModal)}
                 className="group inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
@@ -487,170 +496,178 @@ const TripManagement: React.FC = () => {
           />
         )}
 
-        {/* Trip Assignment Form */}
-        <div className="mb-8 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
-            <h2 className="text-2xl font-bold text-white">Assign New Trip</h2>
-            <p className="text-blue-100 mt-1">Create and assign a new trip to drivers</p>
-          </div>
+        {showTripModal && (
+          <Dialog open={showTripModal} onClose={() => setShowTripModal(false)} className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+            <div className="flex items-center justify-center min-h-screen p-4">
+              <Dialog.Panel className="bg-white rounded-2xl shadow-xl w-full max-w-5xl overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6 text-white flex items-center justify-between">
+                  <h2 className="text-2xl font-bold">Assign New Trip</h2>
+                  <button onClick={() => setShowTripModal(false)} className="text-white/80 hover:text-white">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="p-8 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {/* Driver Selection */}
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                        Driver <span className="text-red-500">*</span>
+                      </label>
+                      <SearchableSelect
+                        data={drivers}
+                        value={form.IDDriver}
+                        onSelect={(value) => handleChange({ target: { name: "IDDriver", value } } as any)}
+                        searchValue={driverSearch}
+                        onSearchChange={setDriverSearch}
+                        show={showDriverDropdown}
+                        onToggle={setShowDriverDropdown}
+                        placeholder="Select driver"
+                        displayField={(driver) => `${driver.name} ${driver.lastName}`}
+                        idField="id"
+                        icon={User}
+                      />
+                    </div>
 
-          <div className="p-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Driver Selection */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  Driver <span className="text-red-500">*</span>
-                </label>
-                <SearchableSelect
-                  data={drivers}
-                  value={form.IDDriver}
-                  onSelect={(value) => handleChange({ target: { name: "IDDriver", value } } as any)}
-                  searchValue={driverSearch}
-                  onSearchChange={setDriverSearch}
-                  show={showDriverDropdown}
-                  onToggle={setShowDriverDropdown}
-                  placeholder="Select driver"
-                  displayField={(driver) => `${driver.name} ${driver.lastName}`}
-                  idField="id"
-                  icon={User}
-                />
-              </div>
+                    {/* Route Selection */}
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                        Route <span className="text-red-500">*</span>
+                      </label>
+                      <SearchableSelect
+                        data={rutes}
+                        value={form.IDRute}
+                        onSelect={(value) => handleChange({ target: { name: "IDRute", value } } as any)}
+                        searchValue={ruteSearch}
+                        onSearchChange={setRuteSearch}
+                        show={showRuteDropdown}
+                        onToggle={setShowRuteDropdown}
+                        placeholder="Select route"
+                        displayField="name"
+                        icon={Route}
+                      />
+                    </div>
 
-              {/* Route Selection */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  Route <span className="text-red-500">*</span>
-                </label>
-                <SearchableSelect
-                  data={rutes}
-                  value={form.IDRute}
-                  onSelect={(value) => handleChange({ target: { name: "IDRute", value } } as any)}
-                  searchValue={ruteSearch}
-                  onSearchChange={setRuteSearch}
-                  show={showRuteDropdown}
-                  onToggle={setShowRuteDropdown}
-                  placeholder="Select route"
-                  displayField="name"
-                  icon={Route}
-                />
-              </div>
+                    {/* Truck Selection */}
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                        Truck <span className="text-red-500">*</span>
+                      </label>
+                      <SearchableSelect
+                        data={trucks}
+                        value={form.IDTruck}
+                        onSelect={(value) => handleChange({ target: { name: "IDTruck", value } } as any)}
+                        searchValue={truckSearch}
+                        onSearchChange={setTruckSearch}
+                        show={showTruckDropdown}
+                        onToggle={setShowTruckDropdown}
+                        placeholder="Select truck"
+                        displayField="plates"
+                        icon={Truck}
+                      />
+                    </div>
 
-              {/* Truck Selection */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  Truck <span className="text-red-500">*</span>
-                </label>
-                <SearchableSelect
-                  data={trucks}
-                  value={form.IDTruck}
-                  onSelect={(value) => handleChange({ target: { name: "IDTruck", value } } as any)}
-                  searchValue={truckSearch}
-                  onSearchChange={setTruckSearch}
-                  show={showTruckDropdown}
-                  onToggle={setShowTruckDropdown}
-                  placeholder="Select truck"
-                  displayField="plates"
-                  icon={Truck}
-                />
-              </div>
+                    {/* Box Selection */}
+                    <div className="space-y-2 lg:col-span-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                        Box <span className="text-red-500">*</span>
+                      </label>
+                      <SearchableSelect
+                        data={boxs}
+                        value={form.IDBox}
+                        onSelect={(value) => handleChange({ target: { name: "IDBox", value } } as any)}
+                        searchValue={boxSearch}
+                        onSearchChange={setBoxSearch}
+                        show={showBoxDropdown}
+                        onToggle={setShowBoxDropdown}
+                        placeholder="Select box"
+                        displayField={(box) => {
+                          const volume = (box.length * box.width * box.height).toFixed(0)
+                          return `#${box._id} − ${volume} m³ − ${box.maxWeigth} Kg`
+                        }}
+                        icon={Truck}
+                      />
+                    </div>
 
-              {/* Box Selection */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  Box <span className="text-red-500">*</span>
-                </label>
-                <SearchableSelect
-                  data={boxs}
-                  value={form.IDBox}
-                  onSelect={(value) => handleChange({ target: { name: "IDBox", value } } as any)}
-                  searchValue={boxSearch}
-                  onSearchChange={setBoxSearch}
-                  show={showBoxDropdown}
-                  onToggle={setShowBoxDropdown}
-                  placeholder="Select box"
-                  displayField={(box) => {
-                    const volume = (box.length * box.width * box.height).toFixed(0)
-                    return `#${box._id} − ${volume} m³ − ${box.maxWeigth} Kg`
-                  }}
-                  icon={Truck}
-                />
-              </div>
+                    {/* Cargo Type Selection */}
+                    <div className="space-y-2 lg:col-span-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                        Cargo Type <span className="text-red-500">*</span>
+                      </label>
+                      <SearchableSelect
+                        data={cargoTypes}
+                        value={form.IDCargoType}
+                        onSelect={(value) => handleChange({ target: { name: "IDCargoType", value } } as any)}
+                        searchValue={cargoSearch}
+                        onSearchChange={setCargoSearch}
+                        show={showCargoDropdown}
+                        onToggle={setShowCargoDropdown}
+                        placeholder="Select cargo type"
+                        displayField="name"
+                        icon={Truck}
+                      />
+                    </div>
 
-              {/* Cargo Type Selection */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  Cargo Type <span className="text-red-500">*</span>
-                </label>
-                <SearchableSelect
-                  data={cargoTypes}
-                  value={form.IDCargoType}
-                  onSelect={(value) => handleChange({ target: { name: "IDCargoType", value } } as any)}
-                  searchValue={cargoSearch}
-                  onSearchChange={setCargoSearch}
-                  show={showCargoDropdown}
-                  onToggle={setShowCargoDropdown}
-                  placeholder="Select cargo type"
-                  displayField="name"
-                  icon={Truck}
-                />
-              </div>
+                    {/* Departure Date */}
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                        <Calendar className="h-4 w-4 text-slate-500" />
+                        Scheduled Departure <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="datetime-local"
+                        name="scheduledDepartureDate"
+                        value={form.scheduledDepartureDate}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400"
+                        disabled={submitting}
+                        min={minDateTime}
+                      />
+                    </div>
 
-              {/* Departure Date */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <Calendar className="h-4 w-4 text-slate-500" />
-                  Scheduled Departure <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="datetime-local"
-                  name="scheduledDepartureDate"
-                  value={form.scheduledDepartureDate}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400"
-                  disabled={submitting}
-                  min={minDateTime}
-                />
-              </div>
+                    {/* Arrival Date */}
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                        <Calendar className="h-4 w-4 text-slate-500" />
+                        Scheduled Arrival <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="datetime-local"
+                        name="scheduledArrivalDate"
+                        value={form.scheduledArrivalDate}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400"
+                        disabled={submitting}
+                        min={form.scheduledDepartureDate}
+                      />
+                    </div>
+                  </div>
 
-              {/* Arrival Date */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <Calendar className="h-4 w-4 text-slate-500" />
-                  Scheduled Arrival <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="datetime-local"
-                  name="scheduledArrivalDate"
-                  value={form.scheduledArrivalDate}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-slate-400"
-                  disabled={submitting}
-                  min={form.scheduledDepartureDate}
-                />
-              </div>
+                  <div className="pt-4">
+                    <button
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                      className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl disabled:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none disabled:cursor-not-allowed"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Assigning Trip...
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="h-5 w-5" />
+                          Assign Trip
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </Dialog.Panel>
             </div>
+          </Dialog>
+        )}
 
-            <div className="pt-4">
-              <button
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl disabled:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 disabled:transform-none disabled:cursor-not-allowed"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Assigning Trip...
-                  </>
-                ) : (
-                  <>
-                    <MapPin className="h-5 w-5" />
-                    Assign Trip
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
 
         {/* Map View */}
         {selectedRute && (
@@ -901,6 +918,7 @@ const TripManagement: React.FC = () => {
                   isOpen={showModalMore}
                   trip={selectedTrip}
                   onClose={() => setShowModalMore(false)}
+                  onUpdated={loadData}
                 />
               )}
             </div>

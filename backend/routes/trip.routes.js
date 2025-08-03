@@ -130,6 +130,41 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.put('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { scheduledDepartureDate, scheduledArrivalDate, status } = req.body;
+
+        const trip = await Trip.findById(id);
+        if (!trip) {
+            return res.status(404).json({ error: 'Trip not found' });
+        }
+
+        if (trip.status === 'Completed' || trip.status === 'Canceled') {
+            return res.status(400).json({ error: 'Trip cannot be modified' });
+        }
+
+        if (status === 'Canceled') {
+            trip.status = 'Canceled';
+        }
+
+        if (trip.status === 'Scheduled') {
+            if (scheduledDepartureDate) {
+                trip.scheduledDepartureDate = scheduledDepartureDate;
+            }
+            if (scheduledArrivalDate) {
+                trip.scheduledArrivalDate = scheduledArrivalDate;
+            }
+        }
+
+        await trip.save();
+        return res.json(trip);
+    } catch (err) {
+        console.error('Error updating trip:', err);
+        return res.status(500).json({ error: 'Error updating trip' });
+    }
+});
+
 router.get('/alerts/today', async (_req, res) => {
     try {
         const startOfDay = new Date();

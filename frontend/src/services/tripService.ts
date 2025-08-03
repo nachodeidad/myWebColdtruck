@@ -29,3 +29,8 @@ export const getTripById = async (id: string): Promise<Trip> => {
     const { data } = await apiLocalHost.get<Trip>(`${BASE_URL}${id}`);
     return data;
 };
+
+export const updateTrip = async (id: string, payload: Partial<{ scheduledDepartureDate: string; scheduledArrivalDate: string; status: string; }>): Promise<Trip> => {
+    const { data } = await apiLocalHost.put<Trip>(`${BASE_URL}/${id}`, payload);
+    return data;
+};
