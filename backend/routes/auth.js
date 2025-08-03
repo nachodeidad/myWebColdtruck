@@ -257,6 +257,37 @@ router.get("/profile", auth, async (req, res) => {
   }
 })
 
+// --- CHANGE PASSWORD ---
+router.put("/change-password", auth, async (req, res) => {
+  try {
+    const userId = Number(req.user.id)
+    const { currentPassword, newPassword } = req.body
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ msg: "Current and new password are required" })
+    }
+
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" })
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password)
+    if (!isMatch) {
+      return res.status(400).json({ msg: "Current password is incorrect" })
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    user.password = await bcrypt.hash(newPassword, salt)
+    await user.save()
+
+    res.json({ msg: "Password updated successfully" })
+  } catch (err) {
+    console.error(err)
+    res.status(500).send("Server error")
+  }
+})
+
 // --- GET ALL USERS (SOLO ADMIN) ---
 router.get("/users", auth, async (req, res) => {
   try {
