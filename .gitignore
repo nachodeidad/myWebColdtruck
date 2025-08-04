@@ -1,0 +1,36 @@
+# Dependencias
+node_modules/
+
+# Directorios de build o empaquetado
+dist/
+build/
+
+# Cachés
+.cache/
+.nyc_output/
+coverage/
+
+# Archivos generados por TypeScript
+*.tsbuildinfo
+
+# Archivos de empaquetado
+*.pack
+
+# Variables de entorno
+.env
+.env.*.local
+
+# Configuración del editor
+.vscode/
+.idea/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
