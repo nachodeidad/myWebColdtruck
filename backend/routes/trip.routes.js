@@ -1,6 +1,9 @@
 const express = require('express');
 const Rute = require('../models/Rute');
 const Trip = require('../models/Trip');
+const User = require('../models/User');
+const Truck = require('../models/Truck');
+const Box = require('../models/Box');
 
 const router = express.Router();
 
@@ -80,6 +83,29 @@ router.post('/', async (req, res) => {
             IDCargoType
         } = req.body;
 
+        const departure = new Date(scheduledDepartureDate);
+        const arrival = new Date(scheduledArrivalDate);
+
+        const timeOverlap = {
+            scheduledDepartureDate: { $lt: arrival },
+            scheduledArrivalDate: { $gt: departure }
+        };
+
+        const statusFilter = { status: { $in: ['Scheduled', 'In Transit'] } };
+
+        if (await Trip.findOne({ IDDriver, ...statusFilter, ...timeOverlap })) {
+            return res.status(400).json({ error: 'Driver already assigned in this period' });
+        }
+        if (await Trip.findOne({ IDTruck, ...statusFilter, ...timeOverlap })) {
+            return res.status(400).json({ error: 'Truck already assigned in this period' });
+        }
+        if (await Trip.findOne({ IDBox, ...statusFilter, ...timeOverlap })) {
+            return res.status(400).json({ error: 'Box already assigned in this period' });
+        }
+        if (await Trip.findOne({ IDRute, ...statusFilter, ...timeOverlap })) {
+            return res.status(400).json({ error: 'Route already assigned in this period' });
+        }
+
         const rute = await Rute.findById(Number(IDRute));
         if (!rute) {
             return res.status(404).json({ error: 'Route not found' });
@@ -155,13 +181,127 @@ router.put('/:id', async (req, res) => {
             if (scheduledArrivalDate) {
                 trip.scheduledArrivalDate = scheduledArrivalDate;
             }
+
+            const newDeparture = new Date(trip.scheduledDepartureDate);
+            const newArrival = new Date(trip.scheduledArrivalDate);
+            const timeOverlap = {
+                _id: { $ne: trip._id },
+                scheduledDepartureDate: { $lt: newArrival },
+                scheduledArrivalDate: { $gt: newDeparture },
+                status: { $in: ['Scheduled', 'In Transit'] }
+            };
+
+            if (await Trip.findOne({ IDDriver: trip.IDDriver, ...timeOverlap })) {
+                return res.status(400).json({ error: 'Driver already assigned in this period' });
+            }
+            if (await Trip.findOne({ IDTruck: trip.IDTruck, ...timeOverlap })) {
+                return res.status(400).json({ error: 'Truck already assigned in this period' });
+            }
+            if (await Trip.findOne({ IDBox: trip.IDBox, ...timeOverlap })) {
+                return res.status(400).json({ error: 'Box already assigned in this period' });
+            }
+            if (await Trip.findOne({ IDRute: trip.IDRute, ...timeOverlap })) {
+                return res.status(400).json({ error: 'Route already assigned in this period' });
+            }
         }
 
         await trip.save();
+
+        if (trip.status === 'Canceled') {
+            await Promise.all([
+                User.findByIdAndUpdate(trip.IDDriver, { status: 'Available' }),
+                Truck.findByIdAndUpdate(trip.IDTruck, { status: 'Available' }),
+                Box.findByIdAndUpdate(trip.IDBox, { status: 'Available' })
+            ]);
+        }
+
         return res.json(trip);
     } catch (err) {
         console.error('Error updating trip:', err);
         return res.status(500).json({ error: 'Error updating trip' });
+    }
+});
+
+router.post('/:id/start', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const trip = await Trip.findById(id);
+        if (!trip) {
+            return res.status(404).json({ error: 'Trip not found' });
+        }
+        if (trip.status !== 'Scheduled') {
+            return res.status(400).json({ error: 'Trip cannot be started' });
+        }
+
+        trip.status = 'In Transit';
+        trip.actualDepartureDate = new Date();
+        await trip.save();
+
+        await Promise.all([
+            User.findByIdAndUpdate(trip.IDDriver, { status: 'On Trip' }),
+            Truck.findByIdAndUpdate(trip.IDTruck, { status: 'On Trip' }),
+            Box.findByIdAndUpdate(trip.IDBox, { status: 'On Trip' })
+        ]);
+
+        return res.json(trip);
+    } catch (err) {
+        console.error('Error starting trip:', err);
+        return res.status(500).json({ error: 'Error starting trip' });
+    }
+});
+
+router.post('/:id/complete', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const trip = await Trip.findById(id);
+        if (!trip) {
+            return res.status(404).json({ error: 'Trip not found' });
+        }
+        if (trip.status !== 'In Transit') {
+            return res.status(400).json({ error: 'Trip cannot be completed' });
+        }
+
+        trip.status = 'Completed';
+        trip.actualArrivalDate = new Date();
+        await trip.save();
+
+        await Promise.all([
+            User.findByIdAndUpdate(trip.IDDriver, { status: 'Available' }),
+            Truck.findByIdAndUpdate(trip.IDTruck, { status: 'Available' }),
+            Box.findByIdAndUpdate(trip.IDBox, { status: 'Available' })
+        ]);
+
+        return res.json(trip);
+    } catch (err) {
+        console.error('Error completing trip:', err);
+        return res.status(500).json({ error: 'Error completing trip' });
+    }
+});
+
+router.post('/:id/cancel', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const trip = await Trip.findById(id);
+        if (!trip) {
+            return res.status(404).json({ error: 'Trip not found' });
+        }
+        if (trip.status === 'Completed' || trip.status === 'Canceled') {
+            return res.status(400).json({ error: 'Trip cannot be canceled' });
+        }
+
+        trip.status = 'Canceled';
+        await trip.save();
+
+        await Promise.all([
+            User.findByIdAndUpdate(trip.IDDriver, { status: 'Available' }),
+            Truck.findByIdAndUpdate(trip.IDTruck, { status: 'Available' }),
+            Box.findByIdAndUpdate(trip.IDBox, { status: 'Available' })
+        ]);
+
+        return res.json(trip);
+    } catch (err) {
+        console.error('Error canceling trip:', err);
+        return res.status(500).json({ error: 'Error canceling trip' });
     }
 });
 
