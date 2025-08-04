@@ -2,8 +2,10 @@ import { Dialog } from "@headlessui/react"
 import { AlertTriangle, Calendar, CheckCircle, Clock, MapPin, Navigation, Package, Pause, Play, Route, Thermometer, Truck, User, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import type { Trip } from '../../../types'
+import type { Trip, Tracking } from '../../../types'
 import { updateTrip } from '../../../services/tripService'
+import { getTrackingByTrip } from '../../../services/trackingService'
+import MapView from '../../Map/MapView'
 
 interface Props {
     isOpen: boolean
@@ -16,11 +18,20 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
     const [departure, setDeparture] = useState(trip.scheduledDepartureDate.slice(0, 16))
     const [arrival, setArrival] = useState(trip.scheduledArrivalDate.slice(0, 16))
     const [saving, setSaving] = useState(false)
+    const [tracking, setTracking] = useState<Tracking[]>([])
 
     useEffect(() => {
         setDeparture(trip.scheduledDepartureDate.slice(0, 16))
         setArrival(trip.scheduledArrivalDate.slice(0, 16))
     }, [trip])
+
+    useEffect(() => {
+        if (isOpen) {
+            getTrackingByTrip(trip._id)
+                .then(setTracking)
+                .catch(err => console.error(err))
+        }
+    }, [isOpen, trip._id])
     
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr)
@@ -108,6 +119,9 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
     // Coordenadas para el mapa
     const originCoords = routeData?.origin?.coordinates || [0, 0]
     const destinationCoords = routeData?.destination?.coordinates || [0, 0]
+
+    const trackingPath = tracking.map(t => t.coordinates as [number, number])
+    const currentPosition = tracking.length > 0 ? tracking[tracking.length - 1].coordinates as [number, number] : undefined
 
     const isLocked = trip.status === 'Completed' || trip.status === 'Canceled'
     const isScheduled = trip.status === 'Scheduled'
@@ -375,36 +389,12 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
                                         <MapPin className="w-5 h-5 text-red-600" />
                                         Route Map
                                     </h3>
-                                    
-                                    <div className="relative bg-gray-100 rounded-xl overflow-hidden" style={{ height: '400px' }}>
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="text-center">
-                                                <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                                                <p className="text-gray-600 text-sm">Route Map</p>
-                                                {routeData && (
-                                                    <>
-                                                        <p className="text-xs text-gray-500 mt-1">
-                                                            Origen: {originCoords[1]?.toFixed(6)}, {originCoords[0]?.toFixed(6)}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500">
-                                                            Destination: {destinationCoords[1]?.toFixed(6)}, {destinationCoords[0]?.toFixed(6)}
-                                                        </p>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                        
-                                        {routeData && (
-                                            <>
-                                                <div className="absolute top-4 left-4 bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold">
-                                                    A - Origin
-                                                </div>
-                                                <div className="absolute bottom-4 right-4 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
-                                                    B - Destination
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
+                                    <MapView
+                                        origin={originCoords as [number, number]}
+                                        destination={destinationCoords as [number, number]}
+                                        path={trackingPath}
+                                        current={currentPosition}
+                                    />
                                 </div>
 
                                 {/* Route Details */}

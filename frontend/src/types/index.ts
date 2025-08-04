@@ -71,4 +71,5 @@ export * from "./Trip";
 export * from "./Truck";
 export * from "./Alert";
 export * from "./SensorReading";
+export * from "./Tracking";
 

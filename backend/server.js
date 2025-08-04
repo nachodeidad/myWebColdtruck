@@ -35,6 +35,7 @@ app.use('/api/sensors', require('./routes/sensor.routes'))
 app.use('/api/sensor_box', require('./routes/sensor_box.routes'))
 app.use('/api/alerts', require('./routes/alert.routes'))
 app.use('/api/sensor_readings', require('./routes/sensorReading.routes'))
+app.use('/api/tracking', require('./routes/tracking.routes'))
 
 // MongoDB connection
 mongoose
