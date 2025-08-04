@@ -5,15 +5,17 @@ import { useEffect, useState } from "react"
 import { useAuth } from "../contexts/AuthContext"
 import { getTrips } from "../services/tripService"
 import { getRuteGeometry } from "../services/ruteService"
+import { getTrackingByTrip } from "../services/trackingService"
 import MapView from "./Map/MapView"
-import type { Trip } from "../types"
+import type { Trip, Tracking } from "../types"
 
 const MyTrips: React.FC = () => {
   const { user } = useAuth()
   const [trips, setTrips] = useState<Trip[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null)
-  const [path, setPath] = useState<[number, number][]>([])
+  const [routePath, setRoutePath] = useState<[number, number][]>([])
+  const [tracking, setTracking] = useState<Tracking[]>([])
 
   useEffect(() => {
     if (!user) return
@@ -29,13 +31,18 @@ const MyTrips: React.FC = () => {
         if (myTrips.length) {
           setSelectedTrip(myTrips[0])
           const rId = typeof myTrips[0].IDRute === 'object' ? myTrips[0].IDRute._id : myTrips[0].IDRute
-          getRuteGeometry(Number(rId)).then(setPath).catch(() => setPath([]))
+          getRuteGeometry(Number(rId)).then(setRoutePath).catch(() => setRoutePath([]))
+          getTrackingByTrip(Number(myTrips[0]._id)).then(setTracking).catch(() => setTracking([]))
         }
       } finally {
         setLoading(false)
       }
     })()
   }, [user])
+
+  const trackingPath = tracking.map(t => t.coordinates as [number, number])
+  const currentPosition = tracking.length > 0 ? tracking[tracking.length - 1].coordinates as [number, number] : undefined
+  const mapPath = trackingPath.length > 1 ? trackingPath : routePath
 
   if (!user) return null
 
@@ -55,9 +62,11 @@ const MyTrips: React.FC = () => {
                 setSelectedTrip(t)
                 if (t) {
                   const rId = typeof t.IDRute === 'object' ? t.IDRute._id : t.IDRute
-                  getRuteGeometry(Number(rId)).then(setPath).catch(() => setPath([]))
+                  getRuteGeometry(Number(rId)).then(setRoutePath).catch(() => setRoutePath([]))
+                  getTrackingByTrip(Number(t._id)).then(setTracking).catch(() => setTracking([]))
                 } else {
-                  setPath([])
+                  setRoutePath([])
+                  setTracking([])
                 }
               }}
             >
@@ -96,11 +105,12 @@ const MyTrips: React.FC = () => {
               ))}
             </tbody>
           </table>
-          {selectedTrip && path.length > 1 && (
+          {selectedTrip && routePath.length > 1 && (
             <MapView
-              origin={path[0]}
-              destination={path[path.length - 1]}
-              path={path}
+              origin={routePath[0]}
+              destination={routePath[routePath.length - 1]}
+              path={mapPath}
+              current={currentPosition}
             />
           )}
         </div>
