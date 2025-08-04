@@ -93,17 +93,48 @@ router.post('/', async (req, res) => {
 
         const statusFilter = { status: { $in: ['Scheduled', 'In Transit'] } };
 
-        if (await Trip.findOne({ IDDriver, ...statusFilter, ...timeOverlap })) {
-            return res.status(400).json({ error: 'Driver already assigned in this period' });
+        const driverConflict = await Trip.findOne({ IDDriver, ...statusFilter, ...timeOverlap });
+        if (driverConflict) {
+            return res.status(400).json({
+                error: 'El conductor ya tiene un viaje asignado en esas fechas',
+                conflicto: {
+                    scheduledDepartureDate: driverConflict.scheduledDepartureDate,
+                    scheduledArrivalDate: driverConflict.scheduledArrivalDate
+                }
+            });
         }
-        if (await Trip.findOne({ IDTruck, ...statusFilter, ...timeOverlap })) {
-            return res.status(400).json({ error: 'Truck already assigned in this period' });
+
+        const truckConflict = await Trip.findOne({ IDTruck, ...statusFilter, ...timeOverlap });
+        if (truckConflict) {
+            return res.status(400).json({
+                error: 'El camión ya tiene un viaje asignado en esas fechas',
+                conflicto: {
+                    scheduledDepartureDate: truckConflict.scheduledDepartureDate,
+                    scheduledArrivalDate: truckConflict.scheduledArrivalDate
+                }
+            });
         }
-        if (await Trip.findOne({ IDBox, ...statusFilter, ...timeOverlap })) {
-            return res.status(400).json({ error: 'Box already assigned in this period' });
+
+        const boxConflict = await Trip.findOne({ IDBox, ...statusFilter, ...timeOverlap });
+        if (boxConflict) {
+            return res.status(400).json({
+                error: 'La caja ya tiene un viaje asignado en esas fechas',
+                conflicto: {
+                    scheduledDepartureDate: boxConflict.scheduledDepartureDate,
+                    scheduledArrivalDate: boxConflict.scheduledArrivalDate
+                }
+            });
         }
-        if (await Trip.findOne({ IDRute, ...statusFilter, ...timeOverlap })) {
-            return res.status(400).json({ error: 'Route already assigned in this period' });
+
+        const routeConflict = await Trip.findOne({ IDRute, ...statusFilter, ...timeOverlap });
+        if (routeConflict) {
+            return res.status(400).json({
+                error: 'La ruta ya está asignada en esas fechas',
+                conflicto: {
+                    scheduledDepartureDate: routeConflict.scheduledDepartureDate,
+                    scheduledArrivalDate: routeConflict.scheduledArrivalDate
+                }
+            });
         }
 
         const rute = await Rute.findById(Number(IDRute));
@@ -191,17 +222,48 @@ router.put('/:id', async (req, res) => {
                 status: { $in: ['Scheduled', 'In Transit'] }
             };
 
-            if (await Trip.findOne({ IDDriver: trip.IDDriver, ...timeOverlap })) {
-                return res.status(400).json({ error: 'Driver already assigned in this period' });
+            const driverConflict = await Trip.findOne({ IDDriver: trip.IDDriver, ...timeOverlap });
+            if (driverConflict) {
+                return res.status(400).json({
+                    error: 'El conductor ya tiene un viaje asignado en esas fechas',
+                    conflicto: {
+                        scheduledDepartureDate: driverConflict.scheduledDepartureDate,
+                        scheduledArrivalDate: driverConflict.scheduledArrivalDate
+                    }
+                });
             }
-            if (await Trip.findOne({ IDTruck: trip.IDTruck, ...timeOverlap })) {
-                return res.status(400).json({ error: 'Truck already assigned in this period' });
+
+            const truckConflict = await Trip.findOne({ IDTruck: trip.IDTruck, ...timeOverlap });
+            if (truckConflict) {
+                return res.status(400).json({
+                    error: 'El camión ya tiene un viaje asignado en esas fechas',
+                    conflicto: {
+                        scheduledDepartureDate: truckConflict.scheduledDepartureDate,
+                        scheduledArrivalDate: truckConflict.scheduledArrivalDate
+                    }
+                });
             }
-            if (await Trip.findOne({ IDBox: trip.IDBox, ...timeOverlap })) {
-                return res.status(400).json({ error: 'Box already assigned in this period' });
+
+            const boxConflict = await Trip.findOne({ IDBox: trip.IDBox, ...timeOverlap });
+            if (boxConflict) {
+                return res.status(400).json({
+                    error: 'La caja ya tiene un viaje asignado en esas fechas',
+                    conflicto: {
+                        scheduledDepartureDate: boxConflict.scheduledDepartureDate,
+                        scheduledArrivalDate: boxConflict.scheduledArrivalDate
+                    }
+                });
             }
-            if (await Trip.findOne({ IDRute: trip.IDRute, ...timeOverlap })) {
-                return res.status(400).json({ error: 'Route already assigned in this period' });
+
+            const routeConflict = await Trip.findOne({ IDRute: trip.IDRute, ...timeOverlap });
+            if (routeConflict) {
+                return res.status(400).json({
+                    error: 'La ruta ya está asignada en esas fechas',
+                    conflicto: {
+                        scheduledDepartureDate: routeConflict.scheduledDepartureDate,
+                        scheduledArrivalDate: routeConflict.scheduledArrivalDate
+                    }
+                });
             }
         }
 
