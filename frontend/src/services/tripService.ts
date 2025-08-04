@@ -1,5 +1,5 @@
 import apiLocalHost from './apiLocalHost'
-import type { Trip } from '../types/Trip'
+import type { Trip, AlertInfo } from '../types'
 
 const BASE_URL = '/trips'
 const SPECIFIC_URL = '/trips/specific'
@@ -26,7 +26,12 @@ export const createTrip = async (payload: TripInput): Promise<Trip> => {
 }
 
 export const getTripById = async (id: string): Promise<Trip> => {
-    const { data } = await apiLocalHost.get<Trip>(`${BASE_URL}${id}`);
+    const { data } = await apiLocalHost.get<Trip>(`${SPECIFIC_URL}/${id}`);
+    return data;
+};
+
+export const getAlertsByTrip = async (id: number): Promise<AlertInfo[]> => {
+    const { data } = await apiLocalHost.get<AlertInfo[]>(`${BASE_URL}/${id}/alerts`);
     return data;
 };
 

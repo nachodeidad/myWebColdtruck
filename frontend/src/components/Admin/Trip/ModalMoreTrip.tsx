@@ -2,9 +2,10 @@ import { Dialog } from "@headlessui/react"
 import { AlertTriangle, Calendar, CheckCircle, Clock, MapPin, Navigation, Package, Pause, Play, Route, Thermometer, Truck, User, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import type { Trip, Tracking } from '../../../types'
-import { updateTrip } from '../../../services/tripService'
+import type { Trip, Tracking, SensorReading, AlertInfo } from '../../../types'
+import { updateTrip, getAlertsByTrip } from '../../../services/tripService'
 import { getTrackingByTrip } from '../../../services/trackingService'
+import { getSensorReadingsByTrip } from '../../../services/sensorReadingService'
 import MapView from '../../Map/MapView'
 
 interface Props {
@@ -19,6 +20,8 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
     const [arrival, setArrival] = useState(trip.scheduledArrivalDate.slice(0, 16))
     const [saving, setSaving] = useState(false)
     const [tracking, setTracking] = useState<Tracking[]>([])
+    const [readings, setReadings] = useState<SensorReading[]>([])
+    const [alerts, setAlerts] = useState<AlertInfo[]>([])
 
     useEffect(() => {
         setDeparture(trip.scheduledDepartureDate.slice(0, 16))
@@ -29,6 +32,14 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
         if (isOpen) {
             getTrackingByTrip(trip._id)
                 .then(setTracking)
+                .catch(err => console.error(err))
+
+            getSensorReadingsByTrip(trip._id)
+                .then(setReadings)
+                .catch(err => console.error(err))
+
+            getAlertsByTrip(trip._id)
+                .then(setAlerts)
                 .catch(err => console.error(err))
         }
     }, [isOpen, trip._id])
@@ -427,6 +438,40 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
                                                     </p>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {readings.length > 0 && (
+                                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <Thermometer className="w-5 h-5 text-cyan-600" />
+                                            Temperature History
+                                        </h3>
+                                        <div className="max-h-48 overflow-y-auto space-y-2">
+                                            {readings.map(r => (
+                                                <div key={r._id} className="flex justify-between text-sm text-gray-700">
+                                                    <span>{new Date(r.dateTime).toLocaleString()}</span>
+                                                    <span>{r.tempReadingValue}°C / {r.humReadingValue}%</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {alerts.length > 0 && (
+                                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <AlertTriangle className="w-5 h-5 text-red-600" />
+                                            Alerts
+                                        </h3>
+                                        <div className="max-h-48 overflow-y-auto space-y-2">
+                                            {alerts.map((a, idx) => (
+                                                <div key={idx} className="flex justify-between text-sm text-gray-700">
+                                                    <span>{new Date(a.dateTime).toLocaleString()}</span>
+                                                    <span className="text-right">{a.type}{a.temperature !== undefined ? ` (${a.temperature}°C)` : ''}</span>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}

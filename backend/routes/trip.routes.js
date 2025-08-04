@@ -165,6 +165,21 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+// Get alerts for a specific trip
+router.get('/:id/alerts', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const trip = await Trip.findById(id, 'alerts');
+        if (!trip) {
+            return res.status(404).json({ error: 'Trip not found' });
+        }
+        return res.json(trip.alerts);
+    } catch (err) {
+        console.error('Error getting trip alerts:', err);
+        return res.status(500).json({ error: 'Error getting trip alerts' });
+    }
+});
+
 router.get('/alerts/today', async (_req, res) => {
     try {
         const startOfDay = new Date();
