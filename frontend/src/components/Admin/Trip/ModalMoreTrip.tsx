@@ -6,6 +6,7 @@ import type { Trip, Tracking, SensorReading, AlertInfo } from '../../../types'
 import { updateTrip, getAlertsByTrip } from '../../../services/tripService'
 import { getTrackingByTrip } from '../../../services/trackingService'
 import { getSensorReadingsByTrip } from '../../../services/sensorReadingService'
+import { getRuteGeometry } from '../../../services/ruteService'
 import MapView from '../../Map/MapView'
 
 interface Props {
@@ -22,6 +23,7 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
     const [tracking, setTracking] = useState<Tracking[]>([])
     const [readings, setReadings] = useState<SensorReading[]>([])
     const [alerts, setAlerts] = useState<AlertInfo[]>([])
+    const [routePath, setRoutePath] = useState<[number, number][]>([])
 
     useEffect(() => {
         setDeparture(trip.scheduledDepartureDate.slice(0, 16))
@@ -40,6 +42,11 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
 
             getAlertsByTrip(trip._id)
                 .then(setAlerts)
+                .catch(err => console.error(err))
+
+            const rId = typeof trip.IDRute === 'object' ? trip.IDRute._id : trip.IDRute
+            getRuteGeometry(Number(rId))
+                .then(setRoutePath)
                 .catch(err => console.error(err))
         }
     }, [isOpen, trip._id])
@@ -133,6 +140,7 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
 
     const trackingPath = tracking.map(t => t.coordinates as [number, number])
     const currentPosition = tracking.length > 0 ? tracking[tracking.length - 1].coordinates as [number, number] : undefined
+    const mapPath = trackingPath.length > 1 ? trackingPath : routePath
 
     const isLocked = trip.status === 'Completed' || trip.status === 'Canceled'
     const isScheduled = trip.status === 'Scheduled'
@@ -403,7 +411,7 @@ const ModalMoreTrip: React.FC<Props> = ({ isOpen, onClose, trip, onUpdated }) =>
                                     <MapView
                                         origin={originCoords as [number, number]}
                                         destination={destinationCoords as [number, number]}
-                                        path={trackingPath}
+                                        path={mapPath}
                                         current={currentPosition}
                                     />
                                 </div>
