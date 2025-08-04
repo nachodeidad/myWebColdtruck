@@ -35,14 +35,26 @@ const destinationIcon = new L.Icon({
   className: 'destination-marker'
 })
 
+const currentIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+  iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+  className: 'current-marker'
+})
+
 export interface MapViewProps {
   origin: [number, number]         // [lng, lat]
   destination: [number, number]    // [lng, lat]
   path?: [number, number][]        // Array de puntos [lng, lat]
+  current?: [number, number]       // Posición actual [lng, lat]
 }
 
 // Componente para manejar actualizaciones del mapa sin re-crear
-const MapUpdater: React.FC<MapViewProps> = ({ origin, destination, path }) => {
+const MapUpdater: React.FC<MapViewProps> = ({ origin, destination, path, current }) => {
   const map = useMap()
   const prevBounds = useRef<L.LatLngBounds | null>(null)
 
@@ -75,6 +87,10 @@ const MapUpdater: React.FC<MapViewProps> = ({ origin, destination, path }) => {
         })
       }
 
+      if (current && current.length === 2 && !isNaN(current[0]) && !isNaN(current[1])) {
+        bounds.extend([current[1], current[0]])
+      }
+
       // Solo actualizar si los bounds han cambiado significativamente
       if (bounds.isValid()) {
         const currentBounds = bounds
@@ -95,12 +111,12 @@ const MapUpdater: React.FC<MapViewProps> = ({ origin, destination, path }) => {
     } catch (error) {
       console.warn('Error in MapUpdater:', error)
     }
-  }, [map, origin, destination, path])
+  }, [map, origin, destination, path, current])
 
   return null
 }
 
-const MapView: React.FC<MapViewProps> = ({ origin, destination, path }) => {
+const MapView: React.FC<MapViewProps> = ({ origin, destination, path, current }) => {
   // Validar props de entrada
   const isValidCoordinate = (coord: [number, number]) => {
     return coord &&
@@ -179,10 +195,17 @@ const MapView: React.FC<MapViewProps> = ({ origin, destination, path }) => {
         />
 
         {/* Marcador de destino */}
-        <Marker
-          position={[destination[1], destination[0]]}
-          icon={destinationIcon}
-        />
+      <Marker
+        position={[destination[1], destination[0]]}
+        icon={destinationIcon}
+      />
+
+        {current && isValidCoordinate(current) && (
+          <Marker
+            position={[current[1], current[0]]}
+            icon={currentIcon}
+          />
+        )}
 
         {/* Línea de ruta si hay datos válidos */}
         {pathPositions.length > 1 && (

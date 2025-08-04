@@ -5,6 +5,7 @@ const Alert = require('../models/Alert');
 
 const router = express.Router();
 
+// Get all readings
 router.get('/', async (_req, res) => {
     try {
         const readings = await SensorReading.find();
@@ -12,6 +13,18 @@ router.get('/', async (_req, res) => {
     } catch (error) {
         console.error('GET /sensor_readings', error);
         res.status(500).json({ error: 'Error getting sensor readings' });
+    }
+});
+
+// Get readings for a specific trip
+router.get('/trip/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const readings = await SensorReading.find({ IDTrip: Number(id) }).sort({ dateTime: 1 });
+        return res.json(readings);
+    } catch (error) {
+        console.error('GET /sensor_readings/trip/:id', error);
+        return res.status(500).json({ error: 'Error getting sensor readings for trip' });
     }
 });
 
@@ -48,6 +61,8 @@ router.post('/', async (req, res) => {
                     if (alert) {
                         trip.alerts.push({
                             IDAlert: alert._id,
+                            type: alert.type,
+                            description: alert.description,
                             dateTime: new Date(),
                             temperature: tempReadingValue,
                             humidity: humReadingValue
